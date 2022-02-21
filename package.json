@@ -1,26 +1,27 @@
 {
-  "name": "matter-js-test",
+  "name": "phaser-test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "e.js",
+  "dependencies": {
+    "express": "^4.17.3",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "phaser": "^3.55.2"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chillbuilds/matter-js-test.git"
+    "url": "git+https://github.com/chillbuilds/phaser-test.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chillbuilds/matter-js-test/issues"
+    "url": "https://github.com/chillbuilds/phaser-test/issues"
   },
-  "homepage": "https://github.com/chillbuilds/matter-js-test#readme",
-  "dependencies": {
-    "express": "^4.17.3",
-    "fs": "0.0.1-security",
-    "matter-js": "^0.18.0",
-    "path": "^0.12.7"
-  }
+  "homepage": "https://github.com/chillbuilds/phaser-test#readme"
 }
