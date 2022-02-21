@@ -1,93 +1,184 @@
 let gameState = {}
-let gameDims = {width: 1200, height: 600}
+let gameDims = {width: 1600, height: 800}
 
-function randNum(max) {
-    return Math.floor(Math.random()*max)
-}
+function randNum(min, max) { 
+    return Math.random() * (max - min) + min;
+} 
 
 function preload() {
     this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 48, frameHeight: 60 })
+    this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 48, frameHeight: 60})
     this.load.image('bg', '../images/sprites/bg.jpeg')
 }
    
 function create() {
     gameState.cursors = this.input.keyboard.createCursorKeys()
-    gameState.bg = this.add.image(600, 320, 'bg')
-    gameState.bg.setScale(2.075)
+    // background setup
+    gameState.bg = this.add.image(800, 420, 'bg')
+    gameState.bg.setScale(3)
 
-    gameState.hero = this.physics.add.sprite(randNum(gameDims.width), (randNum(gameDims.height)/2)+(gameDims.height/2), 'zombie')
+    gameState.hitBox = this.add.rectangle(gameDims.width/2, gameDims.height/2, gameDims.width, gameDims.height, 0xFF0000, 0.4)
+    gameState.hitBox.setDepth(1000)
+    gameState.hitBox.setAlpha(0)
+    console.log(gameState.hitBox)
+    // hero setup
+    gameState.hero = this.physics.add.sprite(400, 400, 'hero')
     gameState.hero.setScale(2.5)
-    gameState.hero.setSize(25, 45, true)
+    gameState.hero.setSize(25, 15, true)
+    gameState.hero.health = 100
+    // gameState.hero.setSize(25, 45, true)
 
-    gameState.zombies = this.physics.add.group({
+    gameState.zombiesLeft = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 10,
-        setXY: { x: -500, y: -500},
+        repeat: 7,
+        setXY: { x: -100, y: gameDims.height/2 },
+        setScale: {x: 2.5, y: 2.5},
+        speed: 1.5
+    })
+    gameState.zombiesRight = this.physics.add.group({
+        key: 'zombie',
+        frame: 0,
+        repeat: 7,
+        setXY: { x: gameDims.width+500, y: gameDims.height+500},
         setScale: {x: 2.5, y: 2.5}
     })
-    console.log(gameState.zombies)
-    // gameState.zombies = this.physics.add.sprite(randNum(gameDims.width)/2+gameDims.width/2, (randNum(gameDims.height)/2)+(gameDims.height/2), 'zombie')
-    // gameState.zombies.setScale(2.5)
-    // gameState.zombies.setSize(25, 45, true)
+
+    gameState.zombiesLeft.children.iterateLocal('setSize', 25, 15, true)
 
     this.anims.create({
-        key: 'spawn',
+        key: 'zombieSpawn',
         frames: this.anims.generateFrameNumbers('zombie', { frames: [0, 1, 2, 3, 4] }),
         frameRate: 8,
         repeat: 0
     })
     this.anims.create({
-        key: 'left',
+        key: 'zombieLeft',
         frames: this.anims.generateFrameNumbers('zombie', { frames: [5, 6, 7] }),
         frameRate: 8,
         repeat: -1
     })
     this.anims.create({
-        key: 'right',
+        key: 'zombieRight',
         frames: this.anims.generateFrameNumbers('zombie', { frames: [8, 9, 10] }),
         frameRate: 8,
         repeat: -1
     })
-    this.physics.add.collider(gameState.zombies, gameState.hero, function (zombie, hero) {
-        console.log('collision hath bean detecteth')
+    this.anims.create({
+        key: 'heroLeft',
+        frames: this.anims.generateFrameNumbers('hero', { frames: [0, 1, 2, 3, 4] }),
+        frameRate: 8,
+        repeat: -1
     })
-    // this.physics.add.collider(
-    //     gameState.zombies,
-    //     gameState.hero,
-    //     function (_zombie, _hero)
-    //     {   
-    //         console.log('collision detected, mufucka')
-    //         console.log('x: ' + _zombie.x)
-    //         console.log('y: ' + _zombie.y)
-    //         _zombie.x = 1300
-    //         _zombie.y = 500
-    //     })
-    gameState.hero.play('spawn')
-    
+    this.anims.create({
+        key: 'heroRight',
+        frames: this.anims.generateFrameNumbers('hero', { frames: [5, 6, 7, 8, 9] }),
+        frameRate: 8,
+        repeat: -1
+    })
+    // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
+    this.physics.add.collider(gameState.zombiesLeft, gameState.hero, function (_hero, _zombie) {
+        _hero.body.enable = false
+        gameState.hitBox.setAlpha(60)
+        if(_hero.health <= 0){
+            _hero.body.enable = false
+            // alert('game over!')
+        }
+        setTimeout(()=>{gameState.hitBox.setAlpha(0)}, 50)
+        setTimeout(()=>{
+            _hero.body.enable = true
+            _hero.health -= 10
+        console.log('health: ' + _hero.health)
+        }, 500)
+        console.log('x: ' + gameState.hero.x)
+    })
+
+    this.physics.add.collider(gameState.zombiesLeft, gameState.zombiesLeft, function (_zombie1, _zombie2) {
+        if(parseInt(_zombie1.x) == parseInt(_zombie2.x)){
+            if(_zombie1.speed < 1.5){_zombie1.speed += 0.25}
+            if(_zombie2.speed > .5){_zombie2.speed -= 0.25}
+            _zombie1.x += 5
+            _zombie2.x -= 5
+        }
+        if(parseInt(_zombie1.y) == parseInt(_zombie2.y)){
+            _zombie1.speed += 0.5
+            _zombie2.speed -= 0.5
+        }
+        if(_zombie1.y > _zombie2.y){_zombie1.setDepth(10);_zombie2.setDepth(1)}
+        if(_zombie1.y < _zombie2.y){_zombie1.setDepth(1);_zombie2.setDepth(10)}
+    })
+
+    let enemyLeftSetup = gameState.zombiesLeft.getChildren()
+    for(var i = 0; i < enemyLeftSetup.length; i++) {
+        enemyLeftSetup[i].x = randNum(-50, -200)
+        enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
+        enemyLeftSetup[i].speed = randNum(.5, 1.5)
+    }
+    // gameState.hero.play('spawn')
+    console.log(gameState.hero)
 }
 
-function update() {
-    // if(gameState.zombie.x > gameState.hero.x){
-    //     gameState.zombie.x -= 2
-    //     gameState.zombie.play('left', true)
-    // }
-    // if(gameState.zombie.x < gameState.hero.x){
-    //     gameState.zombie.x += 2
-    //     gameState.zombie.play('right', true)
-    // }
-    // if(gameState.zombie.y > gameState.hero.y){
-    //     gameState.zombie.y -= 1
-    //     gameState.zombie.play('left', true)
-    // }
-    // if(gameState.zombie.y < gameState.hero.y){
-    //     gameState.zombie.y += 1
-    //     gameState.zombie.play('left', true)
-    // }
-}
+function update() {325
+    if(gameState.hero.y <= 345){
+        gameState.hero.y += 5
+    }
+    if(gameState.hero.y >= 775){
+        gameState.hero.y -= 5
+    }
+    if(gameState.hero.x <= 10){
+        gameState.hero.x += 5
+    }
+    if(gameState.hero.x >= 1585){
+        gameState.hero.x -= 5
+    }
+    // parseInt(game.input.mousePointer.x)
+    //     parseInt(game.input.mousePointer.y)
+    if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
+        gameState.hero.play('heroLeft', true)
+    }
+    if(parseInt(game.input.mousePointer.x) > gameState.hero.x){
+        gameState.hero.play('heroRight', true)
+    }
 
-function spawnZombie() {
+    gameState.hero.setVelocity(0)
+    if(gameState.cursors.left.isDown)
+    {gameState.hero.x -= 5}
+    if(gameState.cursors.right.isDown)
+    {gameState.hero.x += 5}
+    if(gameState.cursors.up.isDown)
+    {gameState.hero.y -= 5}
+    if(gameState.cursors.down.isDown)
+    {gameState.hero.y += 5}
 
+    let enemyLeftRead = gameState.zombiesLeft.getChildren()
+    for(var i = 0; i < enemyLeftRead.length; i++) {
+        // let rand = parseFloat(randNum(1.5, 2)).toFixed(1)
+        if(enemyLeftRead[i].x > gameState.hero.x){
+            enemyLeftRead[i].x -= enemyLeftRead[i].speed
+            enemyLeftRead[i].play('zombieLeft', true)
+        }
+        if(enemyLeftRead[i].x < gameState.hero.x){
+            enemyLeftRead[i].x += enemyLeftRead[i].speed
+            enemyLeftRead[i].play('zombieRight', true)
+        }
+        if(enemyLeftRead[i].y > gameState.hero.y){
+            enemyLeftRead[i].y -= enemyLeftRead[i].speed
+            // enemyRead[i].play('left', true)
+        }
+        if(enemyLeftRead[i].y < gameState.hero.y){
+            enemyLeftRead[i].y += enemyLeftRead[i].speed
+            // enemyRead[i].play('right', true)
+        }
+
+        if(gameState.hero.y > enemyLeftRead[i].y){
+            gameState.hero.setDepth(10)
+            enemyLeftRead[i].setDepth(1)
+        }
+        if(gameState.hero.y < enemyLeftRead[i].y){
+            gameState.hero.setDepth(1)
+            enemyLeftRead[i].setDepth(10)
+        }
+    }
 }
 
 const config = {
@@ -102,6 +193,7 @@ const config = {
             debug: false
         }
     },
+    parent: 'canvasContainer',
     scene: {
         preload,
         create,
