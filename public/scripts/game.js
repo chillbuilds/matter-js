@@ -8,19 +8,27 @@ function randNum(min, max) {
 function preload() {
     this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 48, frameHeight: 60 })
     this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 48, frameHeight: 60})
+    this.load.image('bullet', '../images/sprites/bullet.png')
     this.load.image('bg', '../images/sprites/bg.jpeg')
+    this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
 }
    
 function create() {
+
     gameState.cursors = this.input.keyboard.createCursorKeys()
     // background setup
     gameState.bg = this.add.image(800, 420, 'bg')
     gameState.bg.setScale(3)
 
-    gameState.hitBox = this.add.rectangle(gameDims.width/2, gameDims.height/2, gameDims.width, gameDims.height, 0xFF0000, 0.4)
+    gameState.muzzFlash = this.add.sprite(-500, -500, 'muzzFlash')
+    gameState.muzzFlash.setScale(.05)
+    gameState.muzzFlash.setAlpha(.8)
+
+
+    gameState.hitBox = this.add.rectangle(gameDims.width/2, gameDims.height/2, gameDims.width, gameDims.height, 0xBF1363, 0.4)
     gameState.hitBox.setDepth(1000)
     gameState.hitBox.setAlpha(0)
-    console.log(gameState.hitBox)
+
     // hero setup
     gameState.hero = this.physics.add.sprite(400, 400, 'hero')
     gameState.hero.setScale(2.5)
@@ -43,6 +51,15 @@ function create() {
         setXY: { x: gameDims.width+500, y: gameDims.height+500},
         setScale: {x: 2.5, y: 2.5}
     })
+    gameState.bullets = this.physics.add.group({
+        key: 'bullet',
+        frame: 0,
+        // repeat: 7,
+        setXY: { x: gameDims.width+500, y: gameDims.height+500},
+        setScale: {x: 2.5, y: 2.5}
+    })
+    // gameState.bullets = this.physics.add.group(-500, -500, 'bullet')
+
 
     gameState.zombiesLeft.children.iterateLocal('setSize', 25, 15, true)
 
@@ -108,17 +125,54 @@ function create() {
         if(_zombie1.y < _zombie2.y){_zombie1.setDepth(1);_zombie2.setDepth(10)}
     })
 
+    // this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_zombie, _bullets) {
+        // _zombie.body.enable = false
+        // _zombie.body.embedded = false
+    // })
+
     let enemyLeftSetup = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftSetup.length; i++) {
         enemyLeftSetup[i].x = randNum(-50, -200)
         enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemyLeftSetup[i].speed = randNum(.5, 1.5)
     }
+
+    // mouse click
+    this.input.on('pointerdown', function (pointer) {
+        if(gameState.hero.facing == 'left'){
+            gameState.muzzFlash.flipX = false
+            gameState.muzzFlash.x = gameState.hero.x-50
+            gameState.muzzFlash.y = gameState.hero.y-18
+            // gameState.muzzFlash.x = -500
+        // setTimeout(()=>{gameState.muzzFlash.x = -500}, 5)
+        }
+        if(gameState.hero.facing == 'right'){
+            gameState.muzzFlash.flipX = true
+            gameState.muzzFlash.x = gameState.hero.x+50
+            gameState.muzzFlash.y = gameState.hero.y-18
+            // gameState.muzzFlash.x = -500
+            // setTimeout(()=>{gameState.muzzFlash.x = -500}, 5)
+        }
+
+        setTimeout(()=>{gameState.muzzFlash.x = -500}, 15)
+
+        // console.log(gameState)
+        // gameState.bullets.x = gameState.hero.x
+        // gameState.bullets.y = gameState.hero.y - 18
+        // let bulletphys = this.physics.moveTo(gameState.bullet, game.input.mousePointer.x, game.input.mousePointer.y, 5000)
+        // gameState.bullets.rotation = bulletphys
+        // gameState.bullet.setXY = {x: gameState.hero.x, y: gameState.hero.y}
+        // gameState.bullet = 45
+        // this.add.image(pointer.x, pointer.y, 'logo')
+    }, this);
+
     // gameState.hero.play('spawn')
-    console.log(gameState.hero)
 }
 
-function update() {325
+function update() {
+
+    // console.log(Phaser.Math.Angle.BetweenY(gameState.hero.x, gameState.hero.y, game.input.mousePointer.x, game.input.mousePointer.y))
+
     if(gameState.hero.y <= 345){
         gameState.hero.y += 5
     }
@@ -134,9 +188,11 @@ function update() {325
     // parseInt(game.input.mousePointer.x)
     //     parseInt(game.input.mousePointer.y)
     if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
+        gameState.hero.facing = 'left'
         gameState.hero.play('heroLeft', true)
     }
     if(parseInt(game.input.mousePointer.x) > gameState.hero.x){
+        gameState.hero.facing = 'right'
         gameState.hero.play('heroRight', true)
     }
 
