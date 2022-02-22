@@ -23,5 +23,7 @@
   "bugs": {
     "url": "https://github.com/chillbuilds/phaser-test/issues"
   },
-  "homepage": "https://github.com/chillbuilds/phaser-test#readme"
+  "engines": {
+    "node": "14.17.0"
+  }
 }
