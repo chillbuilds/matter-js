@@ -12,8 +12,8 @@ module.exports = function () {
     // app.post('/test', function (req, res) {
     //     res.json(JSON.stringify())
     // })
-    app.listen(port, () => {
+    // app.listen(port, () => {
         // console.log(`http://localhost:${port}/`)
-        console.log('server started')
-    })
+        // console.log('server started')
+    // })
 }
