@@ -2,7 +2,7 @@ module.exports = function () {
     const express = require('express')
     const path = require('path')
     const app = express()
-    const port = 8080
+    // const port = 8080
 
     app.use(express.static(path.join(__dirname, 'public')))
 
@@ -13,6 +13,7 @@ module.exports = function () {
     //     res.json(JSON.stringify())
     // })
     app.listen(port, () => {
-        console.log(`http://localhost:${port}/`)
+        // console.log(`http://localhost:${port}/`)
+        console.log('server started')
     })
 }
