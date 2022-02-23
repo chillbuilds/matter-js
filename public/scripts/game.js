@@ -38,7 +38,7 @@ function create() {
     gameState.zombiesLeft = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 7,
+        repeat: 50,
         setXY: { x: -100, y: gameDims.height/2 },
         setScale: {x: 2.5, y: 2.5},
         speed: 1.5
@@ -129,7 +129,7 @@ function create() {
 
     let enemyLeftSetup = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftSetup.length; i++) {
-        enemyLeftSetup[i].x = randNum(-50, -200)
+        enemyLeftSetup[i].x = randNum(-50, -1500)
         enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemyLeftSetup[i].speed = randNum(.5, 1.5)
     }
@@ -148,18 +148,23 @@ function create() {
             gameState.muzzFlash.flipX = false
             gameState.muzzFlash.x = gameState.hero.x-50
             gameState.muzzFlash.y = gameState.hero.y-18
+
+            // bullet.x = gameState.hero.x 
+            // bullet.y = gameState.hero.y - 18
         }
         if(gameState.hero.facing == 'right'){
             gameState.muzzFlash.flipX = true
             gameState.muzzFlash.x = gameState.hero.x+50
             gameState.muzzFlash.y = gameState.hero.y-18
+
+            
         }
 
         setTimeout(()=>{gameState.muzzFlash.x = -500}, 20)
 
         // console.log(gameState)
         let bullet = gameState.bullets.children.entries[gameState.hero.bulletCount]
-        bullet.x = gameState.hero.x
+        bullet.x = gameState.hero.x 
         bullet.y = gameState.hero.y - 18
         let bulletphys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, 5000)
         bullet.rotation = bulletphys
@@ -168,13 +173,13 @@ function create() {
         // this.add.image(pointer.x, pointer.y, 'logo')
     }, this)
 
-        this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_zombie, _bullet) {
-        _zombie.x = -500
+        this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_bullet, _zombie) {
+        _zombie.x = 200
         _bullet.x = -500
         // _zombie.body.enable = false
         // _zombie.body.embedded = false
-        _bullet.body.enable = false
-        _bullet.body.embedded = false
+        // _bullet.body.enable = false
+        // _bullet.body.embedded = false
     })
 
     // gameState.hero.play('spawn')
