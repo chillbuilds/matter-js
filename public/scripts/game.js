@@ -132,6 +132,7 @@ function create() {
         enemyLeftSetup[i].x = randNum(-50, -1500)
         enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemyLeftSetup[i].speed = randNum(.5, 1.5)
+        enemyLeftSetup[i].active = true
     }
 
     // this.input.keyboard.on('keydown-SPACE', function (event) {
@@ -174,8 +175,11 @@ function create() {
     }, this)
 
         this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_bullet, _zombie) {
-        _zombie.x = 200
-        _bullet.x = -500
+        _bullet.x = -2000
+        _zombie.x = -500
+        console.log(_zombie.active)
+        _zombie.active = false
+        console.log(_zombie.active)
         // _zombie.body.enable = false
         // _zombie.body.embedded = false
         // _bullet.body.enable = false
@@ -186,8 +190,6 @@ function create() {
 }
 
 function update() {
-
-    // console.log(Phaser.Math.Angle.BetweenY(gameState.hero.x, gameState.hero.y, game.input.mousePointer.x, game.input.mousePointer.y))
 
     if(gameState.hero.y <= 345){
         gameState.hero.y += 5
@@ -224,7 +226,7 @@ function update() {
 
     let enemyLeftRead = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftRead.length; i++) {
-        // let rand = parseFloat(randNum(1.5, 2)).toFixed(1)
+        // if(enemyLeftRead)
         if(enemyLeftRead[i].x > gameState.hero.x){
             enemyLeftRead[i].x -= enemyLeftRead[i].speed
             enemyLeftRead[i].play('zombieLeft', true)
@@ -235,11 +237,9 @@ function update() {
         }
         if(enemyLeftRead[i].y > gameState.hero.y){
             enemyLeftRead[i].y -= enemyLeftRead[i].speed
-            // enemyRead[i].play('left', true)
         }
         if(enemyLeftRead[i].y < gameState.hero.y){
             enemyLeftRead[i].y += enemyLeftRead[i].speed
-            // enemyRead[i].play('right', true)
         }
 
         if(gameState.hero.y > enemyLeftRead[i].y){
