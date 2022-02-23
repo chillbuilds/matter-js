@@ -38,7 +38,7 @@ function create() {
     gameState.zombiesLeft = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 50,
+        repeat: 9,
         setXY: { x: -100, y: gameDims.height/2 },
         setScale: {x: 2.5, y: 2.5},
         speed: 1.5
@@ -133,6 +133,7 @@ function create() {
         enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemyLeftSetup[i].speed = randNum(.5, 1.5)
         enemyLeftSetup[i].active = true
+        enemyLeftSetup[i].health = 100
     }
 
     // this.input.keyboard.on('keydown-SPACE', function (event) {
@@ -175,11 +176,20 @@ function create() {
     }, this)
 
         this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_bullet, _zombie) {
+        _zombie.setVelocityX(0)
+        _zombie.setVelocityY(0)
+        _zombie.health -= 10
+        console.log('zombie health' + _zombie.health)
+        if(_zombie.health <= 0){
+            _zombie.x = -500
+            _zombie.active = false
+            _zombie.visible = false
+        }
+
         _bullet.x = -2000
-        _zombie.x = -500
-        console.log(_zombie.active)
-        _zombie.active = false
-        console.log(_zombie.active)
+    
+        console.log('_zombie.active: ' + _zombie.active)
+        // console.log(_zombie)
         // _zombie.body.enable = false
         // _zombie.body.embedded = false
         // _bullet.body.enable = false
