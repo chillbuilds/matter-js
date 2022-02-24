@@ -35,20 +35,21 @@ function create() {
     gameState.hero.health = 100
     // gameState.hero.setSize(25, 45, true)
 
-    gameState.zombiesLeft = this.physics.add.group({
+    gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 9,
-        setXY: { x: -100, y: gameDims.height/2 },
+        // repeat: 9,
+        setXY: {x: 300, y: 400},
         setScale: {x: 2.5, y: 2.5},
         speed: 1.5
     })
-    gameState.zombiesRight = this.physics.add.group({
-        key: 'zombie',
-        frame: 0,
-        repeat: 7,
-        setXY: { x: gameDims.width+500, y: gameDims.height+500},
-        setScale: {x: 2.5, y: 2.5}
+
+    gameState.bodyHitBox = this.add.rectangle(300, 400, 20, 20, 0xFF0000, )
+    gameState.bodyHitBox.setDepth(100)
+
+    gameState.zombieBody = this.physics.add.group({
+        // repeat: 9,
+        setXY: {x: 300, y: 400}
     })
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
@@ -58,7 +59,7 @@ function create() {
     gameState.hero.bulletCount = 0
 
 
-    gameState.zombiesLeft.children.iterateLocal('setSize', 25, 15, true)
+    gameState.zombies.children.iterateLocal('setSize', 25, 15, true)
 
     this.anims.create({
         key: 'zombieSpawn',
@@ -91,7 +92,7 @@ function create() {
         repeat: -1
     })
     // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
-    this.physics.add.collider(gameState.zombiesLeft, gameState.hero, function (_hero, _zombie) {
+    this.physics.add.collider(gameState.zombies, gameState.hero, function (_hero, _zombie) {
         _hero.body.enable = false
         gameState.hitBox.setAlpha(60)
         if(_hero.health <= 0){
@@ -107,7 +108,7 @@ function create() {
         console.log('x: ' + gameState.hero.x)
     })
 
-    this.physics.add.collider(gameState.zombiesLeft, gameState.zombiesLeft, function (_zombie1, _zombie2) {
+    this.physics.add.collider(gameState.zombies, gameState.zombies, function (_zombie1, _zombie2) {
         if(parseInt(_zombie1.x) == parseInt(_zombie2.x)){
             if(_zombie1.speed < 1.5){_zombie1.speed += 0.25}
             if(_zombie2.speed > .5){_zombie2.speed -= 0.25}
@@ -122,13 +123,14 @@ function create() {
         if(_zombie1.y < _zombie2.y){_zombie1.setDepth(1);_zombie2.setDepth(10)}
     })
 
-    let enemyLeftSetup = gameState.zombiesLeft.getChildren()
+    let enemyLeftSetup = gameState.zombies.getChildren()
     for(var i = 0; i < enemyLeftSetup.length; i++) {
-        enemyLeftSetup[i].x = randNum(-50, -1500)
-        enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
+        // enemyLeftSetup[i].x = randNum(-50, -1500)
+        // enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemyLeftSetup[i].speed = randNum(.5, 1.5)
         enemyLeftSetup[i].active = true
         enemyLeftSetup[i].health = 100
+        enemyLeftSetup[i].body.setImmovable(true)
     }
 
     // this.input.keyboard.on('keydown-SPACE', function (event) {
@@ -170,11 +172,11 @@ function create() {
         // this.add.image(pointer.x, pointer.y, 'logo')
     }, this)
 
-        this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_bullet, _zombie) {
+        this.physics.add.collider(gameState.bullets, gameState.zombies, function (_bullet, _zombie) {
         _zombie.setVelocityX(0)
         _zombie.setVelocityY(0)
         _zombie.health -= 10
-        console.log('zombie health' + _zombie.health)
+        console.log('zombie health:' + _zombie.health)
         if(_zombie.health <= 0){
             _zombie.active = false
         }
@@ -185,10 +187,20 @@ function create() {
         _bullet.x = -2000
     })
 
-    // gameState.hero.play('spawn')
+    gameState.zombies.children.entries[0].play('zombieLeft')
+    gameState.zombies.children.entries[0].anims.stop()
+
 }
 
 function update() {
+    if(gameState.cursors.left.isDown){
+        gameState.zombies.children.entries[0].play('zombieLeft')
+        gameState.zombies.children.entries[0].anims.stop()
+    }
+    if(gameState.cursors.right.isDown){
+        gameState.zombies.children.entries[0].play('zombieRight')
+        gameState.zombies.children.entries[0].anims.stop()
+    }
 
     if(gameState.cursors.left.isUp && gameState.cursors.right.isUp && gameState.cursors.up.isUp && gameState.cursors.down.isUp)
     {gameState.hero.anims.stop()}
@@ -244,7 +256,7 @@ function update() {
         }
     }
 
-    let enemyLeftRead = gameState.zombiesLeft.getChildren()
+    let enemyLeftRead = gameState.zombies.getChildren()
     for(var i = 0; i < enemyLeftRead.length; i++) {
         // deactivate enemies
         if(enemyLeftRead[i].active == false){
@@ -253,20 +265,20 @@ function update() {
             enemyLeftRead[i].embedded = false
             enemyLeftRead[i].visible = false
         }
-        if(enemyLeftRead[i].x > gameState.hero.x){
-            enemyLeftRead[i].x -= enemyLeftRead[i].speed
-            enemyLeftRead[i].play('zombieLeft', true)
-        }
-        if(enemyLeftRead[i].x < gameState.hero.x){
-            enemyLeftRead[i].x += enemyLeftRead[i].speed
-            enemyLeftRead[i].play('zombieRight', true)
-        }
-        if(enemyLeftRead[i].y > gameState.hero.y){
-            enemyLeftRead[i].y -= enemyLeftRead[i].speed
-        }
-        if(enemyLeftRead[i].y < gameState.hero.y){
-            enemyLeftRead[i].y += enemyLeftRead[i].speed
-        }
+        // if(enemyLeftRead[i].x > gameState.hero.x){
+        //     enemyLeftRead[i].x -= enemyLeftRead[i].speed
+        //     enemyLeftRead[i].play('zombieLeft', true)
+        // }
+        // if(enemyLeftRead[i].x < gameState.hero.x){
+        //     enemyLeftRead[i].x += enemyLeftRead[i].speed
+        //     enemyLeftRead[i].play('zombieRight', true)
+        // }
+        // if(enemyLeftRead[i].y > gameState.hero.y){
+        //     enemyLeftRead[i].y -= enemyLeftRead[i].speed
+        // }
+        // if(enemyLeftRead[i].y < gameState.hero.y){
+        //     enemyLeftRead[i].y += enemyLeftRead[i].speed
+        // }
 
         if(gameState.hero.y > enemyLeftRead[i].y){
             gameState.hero.setDepth(10)
