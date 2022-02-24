@@ -181,9 +181,7 @@ function create() {
         _zombie.health -= 10
         console.log('zombie health' + _zombie.health)
         if(_zombie.health <= 0){
-            _zombie.x = -500
             _zombie.active = false
-            _zombie.visible = false
         }
 
         _bullet.x = -2000
@@ -200,6 +198,9 @@ function create() {
 }
 
 function update() {
+
+    if(gameState.cursors.left.isUp && gameState.cursors.right.isUp)
+    {gameState.hero.anims.stop()}
 
     if(gameState.hero.y <= 345){
         gameState.hero.y += 5
@@ -236,7 +237,13 @@ function update() {
 
     let enemyLeftRead = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftRead.length; i++) {
-        // if(enemyLeftRead)
+        // deactivate enemies
+        if(enemyLeftRead[i].active == false){
+            enemyLeftRead[i].x = -500
+            enemyLeftRead[i].enable = false
+            enemyLeftRead[i].embedded = false
+            enemyLeftRead[i].visible = false
+        }
         if(enemyLeftRead[i].x > gameState.hero.x){
             enemyLeftRead[i].x -= enemyLeftRead[i].speed
             enemyLeftRead[i].play('zombieLeft', true)
