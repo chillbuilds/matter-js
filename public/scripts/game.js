@@ -122,11 +122,6 @@ function create() {
         if(_zombie1.y < _zombie2.y){_zombie1.setDepth(1);_zombie2.setDepth(10)}
     })
 
-    // this.physics.add.collider(gameState.bullets, gameState.zombiesLeft, function (_zombie, _bullets) {
-        // _zombie.body.enable = false
-        // _zombie.body.embedded = false
-    // })
-
     let enemyLeftSetup = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftSetup.length; i++) {
         enemyLeftSetup[i].x = randNum(-50, -1500)
@@ -184,14 +179,10 @@ function create() {
             _zombie.active = false
         }
 
+        // /remove bullet from frame
+        _bullet.setVelocityX(0)
+        _bullet.setVelocityY(0)
         _bullet.x = -2000
-    
-        console.log('_zombie.active: ' + _zombie.active)
-        // console.log(_zombie)
-        // _zombie.body.enable = false
-        // _zombie.body.embedded = false
-        // _bullet.body.enable = false
-        // _bullet.body.embedded = false
     })
 
     // gameState.hero.play('spawn')
@@ -199,7 +190,7 @@ function create() {
 
 function update() {
 
-    if(gameState.cursors.left.isUp && gameState.cursors.right.isUp)
+    if(gameState.cursors.left.isUp && gameState.cursors.right.isUp && gameState.cursors.up.isUp && gameState.cursors.down.isUp)
     {gameState.hero.anims.stop()}
 
     if(gameState.hero.y <= 345){
@@ -226,14 +217,32 @@ function update() {
     }
 
     gameState.hero.setVelocity(0)
-    if(gameState.cursors.left.isDown)
-    {gameState.hero.x -= 5}
-    if(gameState.cursors.right.isDown)
-    {gameState.hero.x += 5}
-    if(gameState.cursors.up.isDown)
-    {gameState.hero.y -= 5}
-    if(gameState.cursors.down.isDown)
-    {gameState.hero.y += 5}
+    if(gameState.cursors.left.isDown){
+        gameState.hero.x -= 5}
+    if(gameState.cursors.right.isDown){
+        gameState.hero.x += 5}
+    if(gameState.cursors.up.isDown){
+        gameState.hero.y -= 5
+        if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
+            gameState.hero.facing = 'left'
+            gameState.hero.play('heroLeft', true)
+        }
+        if(parseInt(game.input.mousePointer.x) > gameState.hero.x){
+            gameState.hero.facing = 'right'
+            gameState.hero.play('heroRight', true)
+        }
+    }
+    if(gameState.cursors.down.isDown){
+        gameState.hero.y += 5
+        if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
+            gameState.hero.facing = 'left'
+            gameState.hero.play('heroLeft', true)
+        }
+        if(parseInt(game.input.mousePointer.x) > gameState.hero.x){
+            gameState.hero.facing = 'right'
+            gameState.hero.play('heroRight', true)
+        }
+    }
 
     let enemyLeftRead = gameState.zombiesLeft.getChildren()
     for(var i = 0; i < enemyLeftRead.length; i++) {
