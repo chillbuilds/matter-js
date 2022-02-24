@@ -8,6 +8,7 @@ function randNum(min, max) {
 function preload() {
     this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 192, frameHeight: 240 })
     this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 192, frameHeight: 240})
+    this.load.image('arm', '../images/sprites/arm.png')
     this.load.image('bullet', '../images/sprites/bullet.png')
     this.load.image('bg', '../images/sprites/background.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
@@ -28,11 +29,13 @@ function create() {
     gameState.hitBox.setAlpha(0)
 
     // hero setup
-    gameState.hero = this.physics.add.sprite(400, 400, 'hero')
+    gameState.hero = this.physics.add.sprite(600, 450, 'hero')
     // gameState.hero.setScale(2.5)
     gameState.hero.setSize(25, 15, true)
     gameState.hero.health = 100
-    // gameState.hero.setSize(25, 45, true)
+    gameState.hero.setSize(25, 45, true)
+
+    gameState.heroArm = this.add.sprite(-500, -500, 'arm')
 
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
@@ -209,6 +212,7 @@ function create() {
 }
 
 function update() {
+
     if(gameState.cursors.left.isDown){
         gameState.zombies.children.entries[0].play('zombieLeft')
         gameState.zombies.children.entries[0].anims.stop()
@@ -221,20 +225,16 @@ function update() {
     if(gameState.cursors.left.isUp && gameState.cursors.right.isUp && gameState.cursors.up.isUp && gameState.cursors.down.isUp)
     {gameState.hero.anims.stop()}
 
-    if(gameState.hero.y <= 345){
-        gameState.hero.y += 5
-    }
-    if(gameState.hero.y >= 775){
-        gameState.hero.y -= 5
-    }
-    if(gameState.hero.x <= 10){
-        gameState.hero.x += 5
-    }
-    if(gameState.hero.x >= 1585){
-        gameState.hero.x -= 5
-    }
-    // parseInt(game.input.mousePointer.x)
-    //     parseInt(game.input.mousePointer.y)
+    // bounds boundaries
+    if(gameState.hero.y <= 400){
+        gameState.hero.y += 5}
+    if(gameState.hero.y >= 525){
+        gameState.hero.y -= 5}
+    if(gameState.hero.x <= 24){
+        gameState.hero.x += 5}
+    if(gameState.hero.x >= 1050){
+        gameState.hero.x -= 5}
+        
     if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
         gameState.hero.facing = 'left'
         gameState.hero.play('heroLeft', true)
@@ -244,6 +244,25 @@ function update() {
         gameState.hero.play('heroRight', true)
     }
 
+    // hero arm
+    if(gameState.hero.facing == 'left'){
+        gameState.heroArm.flipX = true
+        gameState.heroArm.flipY = true
+        gameState.heroArm.setOrigin(0.06, 0.66)
+        gameState.heroArm.x = gameState.hero.x + 6
+        gameState.heroArm.y = gameState.hero.y - 18
+        gameState.heroArm.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
+    }
+    if(gameState.hero.facing == 'right'){
+        gameState.heroArm.flipX = true
+        gameState.heroArm.flipY = false
+        gameState.heroArm.x = gameState.hero.x - 6
+        gameState.heroArm.y = gameState.hero.y - 18
+        gameState.heroArm.setOrigin(0.06, 0.33)
+        gameState.heroArm.rotation = Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y)
+    }
+
+    // hero movement and animation
     gameState.hero.setVelocity(0)
     if(gameState.cursors.left.isDown){
         gameState.hero.x -= 5}
@@ -298,10 +317,12 @@ function update() {
 
         if(gameState.hero.y > enemyLeftRead[i].y){
             gameState.hero.setDepth(10)
+            gameState.heroArm.setDepth(11)
             enemyLeftRead[i].setDepth(1)
         }
         if(gameState.hero.y < enemyLeftRead[i].y){
             gameState.hero.setDepth(1)
+            gameState.heroArm.setDepth(2)
             enemyLeftRead[i].setDepth(10)
         }
     }
