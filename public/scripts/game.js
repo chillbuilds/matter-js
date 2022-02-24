@@ -1,15 +1,15 @@
 let gameState = {}
-let gameDims = {width: 1600, height: 800}
+let gameDims = {width: 1200, height: 600}
 
 function randNum(min, max) { 
     return Math.random() * (max - min) + min;
 } 
 
 function preload() {
-    this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 48, frameHeight: 60 })
-    this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 48, frameHeight: 60})
+    this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 192, frameHeight: 240 })
+    this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 192, frameHeight: 240})
     this.load.image('bullet', '../images/sprites/bullet.png')
-    this.load.image('bg', '../images/sprites/bg.jpeg')
+    this.load.image('bg', '../images/sprites/background.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
 }
    
@@ -17,8 +17,7 @@ function create() {
 
     gameState.cursors = this.input.keyboard.createCursorKeys()
     // background setup
-    gameState.bg = this.add.image(800, 420, 'bg')
-    gameState.bg.setScale(3)
+    gameState.bg = this.add.image(gameDims.width/2, gameDims.height/2, 'bg')
 
     gameState.muzzFlash = this.add.sprite(-500, -500, 'muzzFlash')
     gameState.muzzFlash.setScale(.05)
@@ -30,7 +29,7 @@ function create() {
 
     // hero setup
     gameState.hero = this.physics.add.sprite(400, 400, 'hero')
-    gameState.hero.setScale(2.5)
+    // gameState.hero.setScale(2.5)
     gameState.hero.setSize(25, 15, true)
     gameState.hero.health = 100
     // gameState.hero.setSize(25, 45, true)
@@ -40,7 +39,6 @@ function create() {
         frame: 0,
         // repeat: 9,
         setXY: {x: 300, y: 400},
-        setScale: {x: 2.5, y: 2.5},
         speed: 1.5
     })
 
@@ -80,6 +78,12 @@ function create() {
         repeat: -1
     })
     this.anims.create({
+        key: 'zombieDie',
+        frames: this.anims.generateFrameNumbers('zombie', { frames: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20] }),
+        frameRate: 12,
+        repeat: 0
+    })
+    this.anims.create({
         key: 'heroLeft',
         frames: this.anims.generateFrameNumbers('hero', { frames: [0, 1, 2, 3, 4] }),
         frameRate: 8,
@@ -90,6 +94,18 @@ function create() {
         frames: this.anims.generateFrameNumbers('hero', { frames: [5, 6, 7, 8, 9] }),
         frameRate: 8,
         repeat: -1
+    })
+    this.anims.create({
+        key: 'heroDieLeft',
+        frames: this.anims.generateFrameNumbers('hero', { frames: [10, 11, 12, 13, 14, 15, 16, 17, 18] }),
+        frameRate: 8,
+        repeat: 0
+    })
+    this.anims.create({
+        key: 'heroDieRight',
+        frames: this.anims.generateFrameNumbers('hero', { frames: [19, 20, 21, 22, 23, 24, 25, 26, 27] }),
+        frameRate: 8,
+        repeat: 0
     })
     // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
     this.physics.add.collider(gameState.zombies, gameState.hero, function (_hero, _zombie) {
