@@ -12,6 +12,7 @@ function preload() {
     this.load.image('bullet', '../images/sprites/bullet.png')
     this.load.image('bg', '../images/sprites/background.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
+    this.load.image('weapon', '../images/sprites/raygun.png')
 }
    
 function create() {
@@ -37,6 +38,9 @@ function create() {
 
     gameState.heroArm = this.add.sprite(-500, -500, 'arm')
 
+    gameState.weapon = this.add.sprite(400, 400, 'weapon')
+    gameState.weapon.setScale(0.25)
+
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
@@ -55,7 +59,7 @@ function create() {
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
         repeat: 9,
-        setScale: {x: 0.1, y: 0.1}
+        setScale: {x: 0.08, y: 0.08}
     })
     gameState.hero.bulletCount = 0
 
@@ -162,33 +166,39 @@ function create() {
         }
         gameState.hero.bulletCount -= 1
 
-        if(gameState.hero.facing == 'left'){
-            gameState.muzzFlash.flipX = false
-            gameState.muzzFlash.x = gameState.hero.x-50
-            gameState.muzzFlash.y = gameState.hero.y-18
+        // if(gameState.hero.facing == 'left'){
+        //     gameState.muzzFlash.flipX = false
+        //     gameState.muzzFlash.x = gameState.hero.x-50
+        //     gameState.muzzFlash.y = gameState.hero.y-18
 
-            // bullet.x = gameState.hero.x 
-            // bullet.y = gameState.hero.y - 18
-        }
-        if(gameState.hero.facing == 'right'){
-            gameState.muzzFlash.flipX = true
-            gameState.muzzFlash.x = gameState.hero.x+50
-            gameState.muzzFlash.y = gameState.hero.y-18
+        //     // bullet.x = gameState.hero.x 
+        //     // bullet.y = gameState.hero.y - 18
+        // }
+        // if(gameState.hero.facing == 'right'){
+        //     gameState.muzzFlash.flipX = true
+        //     gameState.muzzFlash.x = gameState.hero.x+50
+        //     gameState.muzzFlash.y = gameState.hero.y-18
 
             
-        }
+        // }
 
         setTimeout(()=>{gameState.muzzFlash.x = -500}, 20)
 
         // console.log(gameState)
         let bullet = gameState.bullets.children.entries[gameState.hero.bulletCount]
-        bullet.x = gameState.hero.x 
-        bullet.y = gameState.hero.y - 18
-        let bulletphys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, 5000)
+        // bullet offset
+        if(gameState.hero.facing == 'left'){
+            bullet.setOrigin(-5.8, -.2)
+            bullet.x = gameState.weapon.x
+            bullet.y = gameState.weapon.y
+            }
+        if(gameState.hero.facing == 'right'){
+            bullet.setOrigin(-5.8, 1)
+            bullet.x = gameState.weapon.x
+            bullet.y = gameState.weapon.y
+        }
+        let bulletphys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, 4000)
         bullet.rotation = bulletphys
-        bullet.setXY = {x: gameState.hero.x, y: gameState.hero.y}
-        // gameState.bullet = 45
-        // this.add.image(pointer.x, pointer.y, 'logo')
     }, this)
 
         this.physics.add.collider(gameState.bullets, gameState.zombies, function (_bullet, _zombie) {
@@ -248,18 +258,28 @@ function update() {
     if(gameState.hero.facing == 'left'){
         gameState.heroArm.flipX = true
         gameState.heroArm.flipY = true
-        gameState.heroArm.setOrigin(0.06, 0.66)
+        gameState.heroArm.setOrigin(0.1, 0.66)
         gameState.heroArm.x = gameState.hero.x + 6
-        gameState.heroArm.y = gameState.hero.y - 18
+        gameState.heroArm.y = gameState.hero.y - 19
         gameState.heroArm.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
+        gameState.weapon.flipY = true
+        gameState.weapon.setOrigin(-.38, .45)
+        gameState.weapon.x = gameState.hero.x + 6
+        gameState.weapon.y = gameState.hero.y - 19
+        gameState.weapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
     }
     if(gameState.hero.facing == 'right'){
         gameState.heroArm.flipX = true
         gameState.heroArm.flipY = false
         gameState.heroArm.x = gameState.hero.x - 6
-        gameState.heroArm.y = gameState.hero.y - 18
-        gameState.heroArm.setOrigin(0.06, 0.33)
+        gameState.heroArm.y = gameState.hero.y - 19
+        gameState.heroArm.setOrigin(0.1, 0.33)
         gameState.heroArm.rotation = Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y)
+        gameState.weapon.flipY = false
+        gameState.weapon.setOrigin(-.38, .45)
+        gameState.weapon.x = gameState.hero.x - 8
+        gameState.weapon.y = gameState.hero.y - 24
+        gameState.weapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
     }
 
     // hero movement and animation
@@ -317,12 +337,14 @@ function update() {
 
         if(gameState.hero.y > enemyLeftRead[i].y){
             gameState.hero.setDepth(10)
-            gameState.heroArm.setDepth(11)
+            gameState.weapon.setDepth(11)
+            gameState.heroArm.setDepth(12)
             enemyLeftRead[i].setDepth(1)
         }
         if(gameState.hero.y < enemyLeftRead[i].y){
             gameState.hero.setDepth(1)
-            gameState.heroArm.setDepth(2)
+            gameState.weapon.setDepth(2)
+            gameState.heroArm.setDepth(3)
             enemyLeftRead[i].setDepth(10)
         }
     }
