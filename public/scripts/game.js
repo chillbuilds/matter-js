@@ -13,6 +13,7 @@ function preload() {
     this.load.image('bg', '../images/sprites/background.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
     this.load.image('weapon', '../images/sprites/raygun.png')
+    this.load.image('hitBox', '../images/sprites/hitbox.png')
 }
    
 function create() {
@@ -25,9 +26,9 @@ function create() {
     gameState.muzzFlash.setScale(.05)
     gameState.muzzFlash.setAlpha(.8)
 
-    gameState.hitBox = this.add.rectangle(gameDims.width/2, gameDims.height/2, gameDims.width, gameDims.height, 0xBF1363, 0.4)
-    gameState.hitBox.setDepth(1000)
-    gameState.hitBox.setAlpha(0)
+    gameState.hitEffect = this.add.rectangle(gameDims.width/2, gameDims.height/2, gameDims.width, gameDims.height, 0xBF1363, 0.4)
+    gameState.hitEffect.setDepth(1000)
+    gameState.hitEffect.setAlpha(0)
 
     // hero setup
     gameState.hero = this.physics.add.sprite(600, 450, 'hero')
@@ -44,16 +45,21 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        // repeat: 9,
+        repeat: 9,
         setXY: {x: 300, y: 400},
         speed: 1.5
     })
-
-    gameState.bodyHitBox = this.add.rectangle(300, 400, 20, 20, 0xFF0000, )
-    gameState.bodyHitBox.setDepth(100)
-
     gameState.zombieBody = this.physics.add.group({
-        // repeat: 9,
+        key: 'hitBox',
+        repeat: gameState.zombies.children.entries.length-1,
+        setXY: {x: 300, y: 400}
+    })
+    for(var i = 0; i < 10; i++){
+        gameState.zombieBody.children.entries[i].setScale = 0.2
+    }
+    gameState.zombieHead = this.physics.add.group({
+        key: 'hitBox',
+        repeat: gameState.zombies.children.entries.length-1,
         setXY: {x: 300, y: 400}
     })
     gameState.bullets = this.physics.add.group({
@@ -117,12 +123,12 @@ function create() {
     // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
     this.physics.add.collider(gameState.zombies, gameState.hero, function (_hero, _zombie) {
         _hero.body.enable = false
-        gameState.hitBox.setAlpha(60)
+        gameState.hitEffect.setAlpha(60)
         if(_hero.health <= 0){
             _hero.body.enable = false
             // alert('game over!')
         }
-        setTimeout(()=>{gameState.hitBox.setAlpha(0)}, 50)
+        setTimeout(()=>{gameState.hitEffect.setAlpha(0)}, 50)
         setTimeout(()=>{
             _hero.body.enable = true
             _hero.health -= 10
