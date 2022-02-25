@@ -1,3 +1,4 @@
+
 let gameState = {}
 let gameDims = {width: 1200, height: 600}
 
@@ -45,22 +46,21 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 9,
+        // repeat: 9,
         setXY: {x: 300, y: 400},
         speed: 1.5
     })
     gameState.zombieBody = this.physics.add.group({
         key: 'hitBox',
         repeat: gameState.zombies.children.entries.length-1,
-        setXY: {x: 300, y: 400}
+        setXY: {x: 300, y: 400},
+        setScale: {x:0.175, y: 0.4},
     })
-    for(var i = 0; i < 10; i++){
-        gameState.zombieBody.children.entries[i].setScale = 0.2
-    }
     gameState.zombieHead = this.physics.add.group({
         key: 'hitBox',
         repeat: gameState.zombies.children.entries.length-1,
-        setXY: {x: 300, y: 400}
+        setXY: {x: 600, y: 400},
+        setScale: {x:0.175, y: 0.15}
     })
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
@@ -137,6 +137,15 @@ function create() {
         console.log('x: ' + gameState.hero.x)
     })
 
+    this.physics.add.collider(gameState.zombieBody, gameState.bullets, function (_hitbox, _bullet) {
+        _bullet.x = -5000
+        console.log('body collision dewtected')
+    })
+    this.physics.add.collider(gameState.zombieHead, gameState.bullets, function (_hitbox, _bullet) {
+        _bullet.x = -5000
+        console.log('head collision dewtected')
+    })
+
     this.physics.add.collider(gameState.zombies, gameState.zombies, function (_zombie1, _zombie2) {
         if(parseInt(_zombie1.x) == parseInt(_zombie2.x)){
             if(_zombie1.speed < 1.5){_zombie1.speed += 0.25}
@@ -160,6 +169,19 @@ function create() {
         enemyLeftSetup[i].active = true
         enemyLeftSetup[i].health = 100
         enemyLeftSetup[i].body.setImmovable(true)
+    }
+
+    let zombieBodySetup = gameState.zombieBody.getChildren()
+    for(var i = 0; i < zombieBodySetup.length; i++){
+        zombieBodySetup[i].setDepth(101)
+        zombieBodySetup[i].setOrigin(.2, 0.3)
+        zombieBodySetup[i].body.setImmovable(true)
+    }
+    let zombieHeadSetup = gameState.zombieHead.getChildren()
+    for(var i = 0; i < zombieBodySetup.length; i++){
+        zombieHeadSetup[i].setDepth(101)
+        zombieHeadSetup[i].setOrigin(.2, 0.3)
+        zombieHeadSetup[i].body.setImmovable(true)
     }
 
     // this.input.keyboard.on('keydown-SPACE', function (event) {
@@ -223,20 +245,11 @@ function create() {
     })
 
     gameState.zombies.children.entries[0].play('zombieLeft')
-    gameState.zombies.children.entries[0].anims.stop()
+    // gameState.zombies.children.entries[0].anims.stop()
 
 }
 
 function update() {
-
-    if(gameState.cursors.left.isDown){
-        gameState.zombies.children.entries[0].play('zombieLeft')
-        gameState.zombies.children.entries[0].anims.stop()
-    }
-    if(gameState.cursors.right.isDown){
-        gameState.zombies.children.entries[0].play('zombieRight')
-        gameState.zombies.children.entries[0].anims.stop()
-    }
 
     if(gameState.cursors.left.isUp && gameState.cursors.right.isUp && gameState.cursors.up.isUp && gameState.cursors.down.isUp)
     {gameState.hero.anims.stop()}
@@ -316,42 +329,47 @@ function update() {
             gameState.hero.play('heroRight', true)
         }
     }
-
-    let enemyLeftRead = gameState.zombies.getChildren()
-    for(var i = 0; i < enemyLeftRead.length; i++) {
+    let enemyRead = gameState.zombies.getChildren()
+    for(var i = 0; i < enemyRead.length; i++) {
+        // body hitbox attachment
+        gameState.zombieBody.children.entries[i].x = enemyRead[i].x - 10
+        gameState.zombieBody.children.entries[i].y = enemyRead[i].y -10
+        // head hitbox attachment
+        gameState.zombieHead.children.entries[i].x = enemyRead[i].x - 10
+        gameState.zombieHead.children.entries[i].y = enemyRead[i].y - 60
         // deactivate enemies
-        if(enemyLeftRead[i].active == false){
-            enemyLeftRead[i].x = -500
-            enemyLeftRead[i].enable = false
-            enemyLeftRead[i].embedded = false
-            enemyLeftRead[i].visible = false
+        if(enemyRead[i].active == false){
+            enemyRead[i].x = -500
+            enemyRead[i].enable = false
+            enemyRead[i].embedded = false
+            enemyRead[i].visible = false
         }
-        // if(enemyLeftRead[i].x > gameState.hero.x){
-        //     enemyLeftRead[i].x -= enemyLeftRead[i].speed
-        //     enemyLeftRead[i].play('zombieLeft', true)
-        // }
-        // if(enemyLeftRead[i].x < gameState.hero.x){
-        //     enemyLeftRead[i].x += enemyLeftRead[i].speed
-        //     enemyLeftRead[i].play('zombieRight', true)
-        // }
-        // if(enemyLeftRead[i].y > gameState.hero.y){
-        //     enemyLeftRead[i].y -= enemyLeftRead[i].speed
-        // }
-        // if(enemyLeftRead[i].y < gameState.hero.y){
-        //     enemyLeftRead[i].y += enemyLeftRead[i].speed
-        // }
+        if(enemyRead[i].x > gameState.hero.x){
+            enemyRead[i].x -= enemyRead[i].speed
+            enemyRead[i].play('zombieLeft', true)
+        }
+        if(enemyRead[i].x < gameState.hero.x){
+            enemyRead[i].x += enemyRead[i].speed
+            enemyRead[i].play('zombieRight', true)
+        }
+        if(enemyRead[i].y > gameState.hero.y){
+            enemyRead[i].y -= enemyRead[i].speed
+        }
+        if(enemyRead[i].y < gameState.hero.y){
+            enemyRead[i].y += enemyRead[i].speed
+        }
 
-        if(gameState.hero.y > enemyLeftRead[i].y){
+        if(gameState.hero.y > enemyRead[i].y){
             gameState.hero.setDepth(10)
             gameState.weapon.setDepth(11)
             gameState.heroArm.setDepth(12)
-            enemyLeftRead[i].setDepth(1)
+            enemyRead[i].setDepth(1)
         }
-        if(gameState.hero.y < enemyLeftRead[i].y){
+        if(gameState.hero.y < enemyRead[i].y){
             gameState.hero.setDepth(1)
             gameState.weapon.setDepth(2)
             gameState.heroArm.setDepth(3)
-            enemyLeftRead[i].setDepth(10)
+            enemyRead[i].setDepth(10)
         }
     }
 }
