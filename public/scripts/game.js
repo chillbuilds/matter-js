@@ -24,16 +24,27 @@ function preload() {
 }
    
 function create() {
+    gameState.toggleCooldown = false
 
     gameState.headshotText = this.add.text(-500, -500, '130')
     gameState.headshotText.setDepth(500)
     gameState.bodyshotText = this.add.text(-500, -500, '60')
     gameState.bodyshotText.setDepth(500)
+    gameState.movementKeys = this.add.text(50, 50, 'move player: wasd')
+    gameState.movementKeys.setDepth(500)
+    gameState.weaponKey = this.add.text(50, 75, 'change weapon: caps lock')
+    gameState.weaponKey.setDepth(500)
+    gameState.reloadKey = this.add.text(50, 100, 'reload: r')
+    gameState.reloadKey.setDepth(500)
+    this.add.rectangle(40, 40, 260, 90, 0x0000, 0.5).setDepth(400).setOrigin(0)
 
+    // audio setup
     const kiss = this.sound.add('kiss')
     const gasp = this.sound.add('gasp')
 
     // keyboard setup
+    gameState.changeWeapon = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CAPS_LOCK)
+    gameState.reload = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R)
     gameState.moveUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
     gameState.moveLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
     gameState.moveDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
@@ -369,6 +380,15 @@ function update() {
         gameState.hero.activeWeapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
     }
 
+    //weapon toggle
+    if(gameState.changeWeapon.isDown && gameState.toggleCooldown == false){
+        gameState.toggleCooldown = true
+        gameState.hero.weaponSwap = gameState.hero.inactiveWeapon
+        gameState.hero.inactiveWeapon = gameState.hero.activeWeapon
+        gameState.hero.activeWeapon = gameState.hero.weaponSwap
+        gameState.hero.inactiveWeapon.x = -500
+        setTimeout(()=>{gameState.toggleCooldown = false}, 500)
+    }
     // hero movement and animation
     gameState.hero.setVelocity(0)
     if(gameState.moveLeft.isDown){
