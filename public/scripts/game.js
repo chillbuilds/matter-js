@@ -46,7 +46,7 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        // repeat: 9,
+        repeat: 9,
         setXY: {x: 300, y: 400},
         speed: 1.5
     })
