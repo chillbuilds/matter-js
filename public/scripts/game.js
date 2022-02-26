@@ -53,7 +53,7 @@ function create() {
         frame: 0,
         // repeat: 9,
         setXY: {x: 300, y: 400},
-        speed: 1.5
+        speed: 1.5,
     })
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
@@ -63,14 +63,14 @@ function create() {
     gameState.bullethitBoxes = this.physics.add.group({
         key: 'bullet',
         repeat: 9,
-        setScale: {x: 0.08, y: 0.08}
+        setScale: {x: 0.1, y: 0.1}
     })
     gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = 0
-    gameState.bulletVelocity = 200
+    gameState.bulletVelocity = 3000
     
 
-    gameState.zombies.children.iterateLocal('setSize', 20, 150, true)
+    gameState.zombies.children.iterateLocal('setSize', 25, 150)
 
     this.anims.create({
         key: 'zombieSpawn',
@@ -138,8 +138,11 @@ function create() {
     })
 
     this.physics.add.collider(gameState.zombies, gameState.bullethitBoxes, function (_zombie, _bullet) {
-        console.log(_bullet)
-        console.log(_zombie)
+        console.log('zombie y: ' + _zombie.y)
+        console.log('bullet y: ' + _bullet.y)
+        console.log(_zombie.y - _bullet.y)
+        // console.log(_zombie.y)
+        // if(_zombie.y - _bullet.y > 40){kiss.play()}
         // kiss.play()
         // gasp.play()
         _zombie.health -= 10
@@ -150,9 +153,9 @@ function create() {
 
         // /remove bullet from frame
         _bullet.setVelocity(0)
-        _bullet.x = -500
+        _bullet.x = -1000
         gameState.bullets.children.entries[gameState.hero.bulletCount].setVelocity(0)
-        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -500
+        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -1000
     })
 
     this.physics.add.collider(gameState.zombies, gameState.zombies, function (_zombie1, _zombie2) {
@@ -237,14 +240,14 @@ function update() {
     {gameState.hero.anims.stop()}
 
     // bounds boundaries
-    // if(gameState.hero.y <= 400){
-    //     gameState.hero.y += 5}
-    // if(gameState.hero.y >= 525){
-    //     gameState.hero.y -= 5}
-    // if(gameState.hero.x <= 24){
-    //     gameState.hero.x += 5}
-    // if(gameState.hero.x >= 1050){
-    //     gameState.hero.x -= 5}
+    if(gameState.hero.y <= 400){
+        gameState.hero.y += 5}
+    if(gameState.hero.y >= 525){
+        gameState.hero.y -= 5}
+    if(gameState.hero.x <= 24){
+        gameState.hero.x += 5}
+    if(gameState.hero.x >= 1050){
+        gameState.hero.x -= 5}
         
     if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
         gameState.hero.facing = 'left'
@@ -321,20 +324,20 @@ function update() {
             enemyRead[i].visible = false
         }
         // enemy movement
-        // if(enemyRead[i].x > gameState.hero.x){
-        //     enemyRead[i].x -= enemyRead[i].speed
-        //     enemyRead[i].play('zombieLeft', true)
-        // }
-        // if(enemyRead[i].x < gameState.hero.x){
-        //     enemyRead[i].x += enemyRead[i].speed
-        //     enemyRead[i].play('zombieRight', true)
-        // }
-        // if(enemyRead[i].y > gameState.hero.y){
-        //     enemyRead[i].y -= enemyRead[i].speed
-        // }
-        // if(enemyRead[i].y < gameState.hero.y){
-        //     enemyRead[i].y += enemyRead[i].speed
-        // }
+        if(enemyRead[i].x > gameState.hero.x){
+            enemyRead[i].x -= enemyRead[i].speed
+            enemyRead[i].play('zombieLeft', true)
+        }
+        if(enemyRead[i].x < gameState.hero.x){
+            enemyRead[i].x += enemyRead[i].speed
+            enemyRead[i].play('zombieRight', true)
+        }
+        if(enemyRead[i].y > gameState.hero.y){
+            enemyRead[i].y -= enemyRead[i].speed
+        }
+        if(enemyRead[i].y < gameState.hero.y){
+            enemyRead[i].y += enemyRead[i].speed
+        }
 
         if(gameState.hero.y > enemyRead[i].y){
             gameState.hero.setDepth(10)
@@ -360,7 +363,7 @@ const config = {
         default: 'arcade',
         arcade: {
             // gravity: { y: 300 },
-            debug: true
+            debug: false
         }
     },
     parent: 'canvasContainer',
