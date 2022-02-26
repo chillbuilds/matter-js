@@ -74,7 +74,7 @@ function create() {
     })
     gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = 0
-    gameState.bulletVelocity = 3000
+    gameState.bulletVelocity = 2500
     
 
     gameState.zombies.children.iterateLocal('setSize', 25, 150)
@@ -147,14 +147,13 @@ function create() {
 
     this.physics.add.collider(gameState.zombies, gameState.bullethitBoxes, function (_zombie, _bullet) {
         if(_zombie.active == true){
-        console.log('zombie y: ' + _zombie.y)
-        console.log('bullet y: ' + _bullet.y)
-        console.log(_zombie.y - _bullet.y)
-        // console.log(_zombie.y)
-        // if(_zombie.y - _bullet.y > 40){kiss.play()}
-        // kiss.play()
-        // gasp.play()
-        _zombie.health -= 10
+        if(_zombie.y - _bullet.y > 30){
+            // headshot
+            _zombie.health -= 25
+        }else{
+            // bodyshot
+            _zombie.health -= 10
+        }
         console.log('zombie health:' + _zombie.health)
         if(_zombie.health <= 0){
             _zombie.active = false
