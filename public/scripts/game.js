@@ -42,7 +42,6 @@ function create() {
     // gameState.hero.setScale(2.5)
     gameState.hero.setSize(25, 15, true)
     gameState.hero.health = 100
-    gameState.hero.setSize(25, 45, true)
 
     gameState.heroArm = this.add.sprite(-500, -500, 'arm')
 
@@ -56,27 +55,22 @@ function create() {
         setXY: {x: 300, y: 400},
         speed: 1.5
     })
-    gameState.zombieBody = this.physics.add.group({
-        key: 'hitBox',
-        repeat: gameState.zombies.children.entries.length-1,
-        setXY: {x: 300, y: 400},
-        setScale: {x:0.2, y: 0.4},
-    })
-    gameState.zombieHead = this.physics.add.group({
-        key: 'hitBox',
-        repeat: gameState.zombies.children.entries.length-1,
-        setXY: {x: 600, y: 400},
-        setScale: {x:0.2, y: 0.2}
-    })
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
         repeat: 9,
         setScale: {x: 0.08, y: 0.08}
     })
+    gameState.bullethitBoxes = this.physics.add.group({
+        key: 'bullet',
+        repeat: 9,
+        setScale: {x: 0.08, y: 0.08}
+    })
+    gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = 0
+    gameState.bulletVelocity = 200
+    
 
-
-    gameState.zombies.children.iterateLocal('setSize', 25, 15, true)
+    gameState.zombies.children.iterateLocal('setSize', 20, 150, true)
 
     this.anims.create({
         key: 'zombieSpawn',
@@ -143,19 +137,22 @@ function create() {
         console.log('x: ' + gameState.hero.x)
     })
 
-    this.physics.add.collider(gameState.zombieBody, gameState.bullets, function (_hitbox, _bullet) {
-        _bullet.setVelocityX(0)
-        _bullet.setVelocityY(0)
-        _bullet.x = -5000
-        kiss.play()
-        console.log('body collision dewtected')
-    })
-    this.physics.add.collider(gameState.zombieHead, gameState.bullets, function (_hitbox, _bullet) {
-        _bullet.setVelocityX(0)
-        _bullet.setVelocityY(0)
-        _bullet.x = -5000
-        gasp.play()
-        console.log('head collision dewtected')
+    this.physics.add.collider(gameState.zombies, gameState.bullethitBoxes, function (_zombie, _bullet) {
+        console.log(_bullet)
+        console.log(_zombie)
+        // kiss.play()
+        // gasp.play()
+        _zombie.health -= 10
+        console.log('zombie health:' + _zombie.health)
+        if(_zombie.health <= 0){
+            _zombie.active = false
+        }
+
+        // /remove bullet from frame
+        _bullet.setVelocity(0)
+        _bullet.x = -500
+        gameState.bullets.children.entries[gameState.hero.bulletCount].setVelocity(0)
+        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -500
     })
 
     this.physics.add.collider(gameState.zombies, gameState.zombies, function (_zombie1, _zombie2) {
@@ -183,22 +180,6 @@ function create() {
         enemyLeftSetup[i].body.setImmovable(true)
     }
 
-    let zombieBodySetup = gameState.zombieBody.getChildren()
-    for(var i = 0; i < zombieBodySetup.length; i++){
-        zombieBodySetup[i].setDepth(101)
-        zombieBodySetup[i].setOrigin(.2, .1)
-        zombieBodySetup[i].body.setImmovable(true)
-    }
-    let zombieHeadSetup = gameState.zombieHead.getChildren()
-    for(var i = 0; i < zombieBodySetup.length; i++){
-        zombieHeadSetup[i].setDepth(101)
-        zombieHeadSetup[i].setOrigin(.2, 0.3)
-        zombieHeadSetup[i].body.setImmovable(true)
-    }
-
-    // this.input.keyboard.on('keydown-SPACE', function (event) {
-    //     console.log('Hello from the Space Bar!')
-    // })
     // mouse click
     this.input.on('pointerdown', function (pointer) {
         if(gameState.hero.bulletCount < 1){
@@ -223,38 +204,27 @@ function create() {
         // }
 
         setTimeout(()=>{gameState.muzzFlash.x = -500}, 20)
-
-        // console.log(gameState)
+        
         let bullet = gameState.bullets.children.entries[gameState.hero.bulletCount]
+        let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
         // bullet offset
         if(gameState.hero.facing == 'left'){
             bullet.setOrigin(-5.8, -.2)
-            bullet.x = gameState.weapon.x
-            bullet.y = gameState.weapon.y
+            
             }
         if(gameState.hero.facing == 'right'){
             bullet.setOrigin(-5.8, 1)
-            bullet.x = gameState.weapon.x
-            bullet.y = gameState.weapon.y
         }
-        let bulletphys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, 3000)
-        bullet.rotation = bulletphys
+        bullet.x = gameState.weapon.x
+        bullet.y = gameState.weapon.y
+        bullethitBox.x = gameState.hero.x
+        bullethitBox.y = gameState.hero.y
+
+        let bulletPhys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
+        this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
+
+        bullet.rotation = bulletPhys
     }, this)
-
-        this.physics.add.collider(gameState.bullets, gameState.zombies, function (_bullet, _zombie) {
-        _zombie.setVelocityX(0)
-        _zombie.setVelocityY(0)
-        _zombie.health -= 10
-        console.log('zombie health:' + _zombie.health)
-        if(_zombie.health <= 0){
-            _zombie.active = false
-        }
-
-        // /remove bullet from frame
-        _bullet.setVelocityX(0)
-        _bullet.setVelocityY(0)
-        _bullet.x = -2000
-    })
 
     gameState.zombies.children.entries[0].play('zombieLeft')
     // gameState.zombies.children.entries[0].anims.stop()
@@ -343,12 +313,6 @@ function update() {
     }
     let enemyRead = gameState.zombies.getChildren()
     for(var i = 0; i < enemyRead.length; i++) {
-        // body hitbox attachment
-        gameState.zombieBody.children.entries[i].x = enemyRead[i].x - 10
-        gameState.zombieBody.children.entries[i].y = enemyRead[i].y -10
-        // head hitbox attachment
-        gameState.zombieHead.children.entries[i].x = enemyRead[i].x - 10
-        gameState.zombieHead.children.entries[i].y = enemyRead[i].y - 60
         // deactivate enemies
         if(enemyRead[i].active == false){
             enemyRead[i].x = -500
@@ -396,7 +360,7 @@ const config = {
         default: 'arcade',
         arcade: {
             // gravity: { y: 300 },
-            debug: false
+            debug: true
         }
     },
     parent: 'canvasContainer',
