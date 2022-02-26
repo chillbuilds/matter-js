@@ -33,7 +33,13 @@ function create() {
     const kiss = this.sound.add('kiss')
     const gasp = this.sound.add('gasp')
 
+    // keyboard setup
+    gameState.moveUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
+    gameState.moveLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
+    gameState.moveDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
+    gameState.moveRight = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
     gameState.cursors = this.input.keyboard.createCursorKeys()
+
     // background setup
     gameState.bg = this.add.image(gameDims.width/2, gameDims.height/2, 'bg')
 
@@ -311,7 +317,9 @@ function create() {
 
 function update() {
 
-    if(gameState.cursors.left.isUp && gameState.cursors.right.isUp && gameState.cursors.up.isUp && gameState.cursors.down.isUp)
+    
+
+    if(gameState.moveUp.isUp && gameState.moveDown.isUp && gameState.moveLeft.isUp && gameState.moveRight.isUp)
     {gameState.hero.anims.stop()}
 
     // bounds boundaries
@@ -363,11 +371,11 @@ function update() {
 
     // hero movement and animation
     gameState.hero.setVelocity(0)
-    if(gameState.cursors.left.isDown){
+    if(gameState.moveLeft.isDown){
         gameState.hero.x -= 5}
-    if(gameState.cursors.right.isDown){
+    if(gameState.moveRight.isDown){
         gameState.hero.x += 5}
-    if(gameState.cursors.up.isDown){
+    if(gameState.moveUp.isDown){
         gameState.hero.y -= 5
         if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
             gameState.hero.facing = 'left'
@@ -378,7 +386,7 @@ function update() {
             gameState.hero.play('heroRight', true)
         }
     }
-    if(gameState.cursors.down.isDown){
+    if(gameState.moveDown.isDown){
         gameState.hero.y += 5
         if(parseInt(game.input.mousePointer.x) < gameState.hero.x){
             gameState.hero.facing = 'left'
