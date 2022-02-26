@@ -10,10 +10,13 @@ function preload() {
     this.load.spritesheet('zombie', '../images/sprites/zombie.png', { frameWidth: 192, frameHeight: 240 })
     this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 192, frameHeight: 240})
     this.load.image('arm', '../images/sprites/arm.png')
-    this.load.image('bullet', '../images/sprites/bullet.png')
+    this.load.image('bullet', '../images/sprites/weapons/bullet.png')
     this.load.image('bg', '../images/sprites/background.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
-    this.load.image('weapon', '../images/sprites/raygun.png')
+    this.load.image('nambu', '../images/sprites/weapons/nambu.png')
+    this.load.image('m1', '../images/sprites/weapons/m1.png')
+    this.load.image('raygun', '../images/sprites/weapons/raygun.png')
+    this.load.image('sawedOff', '../images/sprites/weapons/sawedOff.png')
     this.load.image('hitBox', '../images/sprites/hitbox.png')
 
     this.load.audio('kiss', '../audio/kiss.wav')
@@ -51,13 +54,62 @@ function create() {
 
     gameState.heroArm = this.add.sprite(-500, -500, 'arm')
 
-    gameState.weapon = this.add.sprite(400, 400, 'weapon')
-    gameState.weapon.setScale(0.25)
+    // weapon offsets: [weaponLeftX, weaponLeftY, weaponRightX, weaponRightY, bulletLeftX, bulletLeftY, bulletRightX, bulletRightY]
+    gameState.weapon = {}
+    gameState.weapon.nambu = this.add.sprite(-500, -500, 'nambu')
+    gameState.weapon.nambu.setScale(0.3)
+    gameState.weapon.nambu.offset = [-.7, .6, -.7, .25, -4.8, -.35, -5.3, 1.2]
+    gameState.weapon.nambu.damage = 30
+    gameState.weapon.nambu.magCapacity = 8
+    gameState.weapon.nambu.ammoCapacity = 80
+    gameState.weapon.nambu.mag = gameState.weapon.nambu.magCapacity
+    gameState.weapon.nambu.ammo = gameState.weapon.nambu.ammoCapacity + gameState.weapon.nambu.magCapacity
+    gameState.weapon.nambu.fireRate = 1200
+    gameState.weapon.nambu.reloadSpeed = 1.7
+    gameState.weapon.nambu.reloadEmptySpeed = 2.5
+
+    gameState.weapon.m1 = this.add.sprite(-500, -500, 'm1')
+    gameState.weapon.m1.setScale(0.35)
+    gameState.weapon.m1.offset = [-.15, .52, -.1, .3, -5.3, -.1, -5.3, .85]
+    gameState.weapon.m1.magCapacity = 8
+    gameState.weapon.m1.ammoCapacity = 80
+    gameState.weapon.m1.mag = gameState.weapon.m1.magCapacity
+    gameState.weapon.m1.ammo = gameState.weapon.m1.ammoCapacity + gameState.weapon.m1.magCapacity
+    gameState.weapon.m1.fireRate = 1200
+    gameState.weapon.m1.reloadSpeed = 1.7
+    gameState.weapon.m1.reloadEmptySpeed = 2.5
+
+    gameState.weapon.raygun = this.add.sprite(-500, -500, 'raygun')
+    gameState.weapon.raygun.setScale(0.25)
+    gameState.weapon.raygun.offset = [-.38, .45, -.38, .45, -4, -.2, -4, 1]
+    gameState.weapon.raygun.damage = 70
+    gameState.weapon.raygun.magCapacity = 8
+    gameState.weapon.raygun.ammoCapacity = 80
+    gameState.weapon.raygun.mag = gameState.weapon.raygun.magCapacity
+    gameState.weapon.raygun.ammo = gameState.weapon.raygun.ammoCapacity + gameState.weapon.raygun.magCapacity
+    gameState.weapon.raygun.fireRate = 1200
+    gameState.weapon.raygun.reloadSpeed = 1.7
+    gameState.weapon.raygun.reloadEmptySpeed = 2.5
+
+    gameState.weapon.sawedOff = this.add.sprite(-500, -500, 'sawedOff')
+    gameState.weapon.sawedOff.setScale(0.35)
+    gameState.weapon.sawedOff.offset = [0, .65, 0, .2, -4.8, 0, -4.8, .8]
+    gameState.weapon.sawedOff.damage = 45*2
+    gameState.weapon.sawedOff.magCapacity = 8
+    gameState.weapon.sawedOff.ammoCapacity = 80
+    gameState.weapon.sawedOff.mag = gameState.weapon.sawedOff.magCapacity
+    gameState.weapon.sawedOff.ammo = gameState.weapon.sawedOff.ammoCapacity + gameState.weapon.sawedOff.magCapacity
+    gameState.weapon.sawedOff.fireRate = 1200
+    gameState.weapon.sawedOff.reloadSpeed = 1.7
+    gameState.weapon.sawedOff.reloadEmptySpeed = 2.5
+
+    gameState.hero.activeWeapon = gameState.weapon.m1
+    gameState.hero.inactiveWeapon = gameState.weapon.nambu
 
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 7,
+        repeat: 11,
         speed: 1.5,
     })
     gameState.zombiesDead = this.add.group({
@@ -70,7 +122,7 @@ function create() {
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
         repeat: 9,
-        setScale: {x: 0.08, y: 0.08},
+        setScale: {x: 0.05, y: 0.05},
         setImmovable: true
     })
     gameState.bullethitBoxes = this.physics.add.group({
@@ -236,14 +288,13 @@ function create() {
         let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
         // bullet offset
         if(gameState.hero.facing == 'left'){
-            bullet.setOrigin(-5.8, -.2)
-            
+            bullet.setOrigin(gameState.hero.activeWeapon.offset[4], gameState.hero.activeWeapon.offset[5])
             }
         if(gameState.hero.facing == 'right'){
-            bullet.setOrigin(-5.8, 1)
+            bullet.setOrigin(gameState.hero.activeWeapon.offset[6], gameState.hero.activeWeapon.offset[7])
         }
-        bullet.x = gameState.weapon.x
-        bullet.y = gameState.weapon.y
+        bullet.x = gameState.hero.activeWeapon.x
+        bullet.y = gameState.hero.activeWeapon.y
         bullethitBox.x = gameState.hero.x
         bullethitBox.y = gameState.hero.y
 
@@ -290,11 +341,11 @@ function update() {
         gameState.heroArm.x = gameState.hero.x + 6
         gameState.heroArm.y = gameState.hero.y - 19
         gameState.heroArm.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
-        gameState.weapon.flipY = true
-        gameState.weapon.setOrigin(-.38, .45)
-        gameState.weapon.x = gameState.hero.x + 6
-        gameState.weapon.y = gameState.hero.y - 19
-        gameState.weapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
+        gameState.hero.activeWeapon.flipY = true
+        gameState.hero.activeWeapon.setOrigin(gameState.hero.activeWeapon.offset[0], gameState.hero.activeWeapon.offset[1])
+        gameState.hero.activeWeapon.x = gameState.hero.x + 6
+        gameState.hero.activeWeapon.y = gameState.hero.y - 19
+        gameState.hero.activeWeapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
     }
     if(gameState.hero.facing == 'right'){
         gameState.heroArm.flipX = true
@@ -303,11 +354,11 @@ function update() {
         gameState.heroArm.y = gameState.hero.y - 19
         gameState.heroArm.setOrigin(0.1, 0.33)
         gameState.heroArm.rotation = Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y)
-        gameState.weapon.flipY = false
-        gameState.weapon.setOrigin(-.38, .45)
-        gameState.weapon.x = gameState.hero.x - 8
-        gameState.weapon.y = gameState.hero.y - 24
-        gameState.weapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
+        gameState.hero.activeWeapon.flipY = false
+        gameState.hero.activeWeapon.setOrigin(gameState.hero.activeWeapon.offset[2], gameState.hero.activeWeapon.offset[3])
+        gameState.hero.activeWeapon.x = gameState.hero.x - 8
+        gameState.hero.activeWeapon.y = gameState.hero.y - 24
+        gameState.hero.activeWeapon.rotation = (Phaser.Math.Angle.Between(gameState.heroArm.x, gameState.heroArm.y, game.input.mousePointer.x, game.input.mousePointer.y))
     }
 
     // hero movement and animation
@@ -368,13 +419,13 @@ function update() {
 
         if(gameState.hero.y > enemyRead[i].y){
             gameState.hero.setDepth(10)
-            gameState.weapon.setDepth(11)
+            gameState.hero.activeWeapon.setDepth(11)
             gameState.heroArm.setDepth(12)
             enemyRead[i].setDepth(1)
         }
         if(gameState.hero.y < enemyRead[i].y){
             gameState.hero.setDepth(1)
-            gameState.weapon.setDepth(2)
+            gameState.hero.activeWeapon.setDepth(2)
             gameState.heroArm.setDepth(3)
             enemyRead[i].setDepth(10)
         }
@@ -387,10 +438,6 @@ function moveTheDead(enemy, enemyDead) {
         enemyDead.x = -500
         enemyDead.anims.stop()
     }, 1100)
-}
-
-function addText() {
-    this.add.text(200,200,'eh besh')
 }
 
 const config = {
