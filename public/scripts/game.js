@@ -51,14 +51,21 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        // repeat: 9,
-        setXY: {x: 300, y: 400},
+        repeat: 7,
         speed: 1.5,
+    })
+    gameState.zombiesDead = this.add.group({
+        key: 'zombie',
+        frame: 0,
+        repeat: gameState.zombies.children.entries.length-1,
+        setXY: {x: -500, y: -500},
+        hideOnComplete: true
     })
     gameState.bullets = this.physics.add.group({
         key: 'bullet',
         repeat: 9,
-        setScale: {x: 0.08, y: 0.08}
+        setScale: {x: 0.08, y: 0.08},
+        setImmovable: true
     })
     gameState.bullethitBoxes = this.physics.add.group({
         key: 'bullet',
@@ -92,7 +99,7 @@ function create() {
     })
     this.anims.create({
         key: 'zombieDie',
-        frames: this.anims.generateFrameNumbers('zombie', { frames: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20] }),
+        frames: this.anims.generateFrameNumbers('zombie', { frames: [11, 12, 13, 14, 15, 16, 17, 18, 18, 18, 18, 18, 19, 20] }),
         frameRate: 12,
         repeat: 0
     })
@@ -122,11 +129,11 @@ function create() {
     })
     // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
     this.physics.add.collider(gameState.zombies, gameState.hero, function (_hero, _zombie) {
+        if(_zombie.active == true){
         _hero.body.enable = false
         gameState.hitEffect.setAlpha(60)
         if(_hero.health <= 0){
             _hero.body.enable = false
-            // alert('game over!')
         }
         setTimeout(()=>{gameState.hitEffect.setAlpha(0)}, 50)
         setTimeout(()=>{
@@ -135,9 +142,11 @@ function create() {
         console.log('health: ' + _hero.health)
         }, 500)
         console.log('x: ' + gameState.hero.x)
+        }
     })
 
     this.physics.add.collider(gameState.zombies, gameState.bullethitBoxes, function (_zombie, _bullet) {
+        if(_zombie.active == true){
         console.log('zombie y: ' + _zombie.y)
         console.log('bullet y: ' + _bullet.y)
         console.log(_zombie.y - _bullet.y)
@@ -156,9 +165,11 @@ function create() {
         _bullet.x = -1000
         gameState.bullets.children.entries[gameState.hero.bulletCount].setVelocity(0)
         gameState.bullets.children.entries[gameState.hero.bulletCount].x = -1000
+        }
     })
 
     this.physics.add.collider(gameState.zombies, gameState.zombies, function (_zombie1, _zombie2) {
+        if(_zombie1.active == true && _zombie2.active == true)
         if(parseInt(_zombie1.x) == parseInt(_zombie2.x)){
             if(_zombie1.speed < 1.5){_zombie1.speed += 0.25}
             if(_zombie2.speed > .5){_zombie2.speed -= 0.25}
@@ -173,14 +184,14 @@ function create() {
         if(_zombie1.y < _zombie2.y){_zombie1.setDepth(1);_zombie2.setDepth(10)}
     })
 
-    let enemyLeftSetup = gameState.zombies.getChildren()
-    for(var i = 0; i < enemyLeftSetup.length; i++) {
-        // enemyLeftSetup[i].x = randNum(-50, -1500)
-        // enemyLeftSetup[i].y = randNum(gameDims.height/2, gameDims.height)
-        enemyLeftSetup[i].speed = randNum(.5, 1.5)
-        enemyLeftSetup[i].active = true
-        enemyLeftSetup[i].health = 100
-        enemyLeftSetup[i].body.setImmovable(true)
+    let enemySetup = gameState.zombies.getChildren()
+    for(var i = 0; i < enemySetup.length; i++) {
+        enemySetup[i].x = randNum(-50, -200)
+        enemySetup[i].y = randNum(gameDims.height/2, gameDims.height)
+        enemySetup[i].speed = randNum(.5, 1.5)
+        enemySetup[i].active = true
+        enemySetup[i].health = 50
+        enemySetup[i].body.setImmovable(true)
     }
 
     // mouse click
@@ -229,7 +240,7 @@ function create() {
         bullet.rotation = bulletPhys
     }, this)
 
-    gameState.zombies.children.entries[0].play('zombieLeft')
+    // gameState.zombies.children.entries[0].play('zombieLeft')
     // gameState.zombies.children.entries[0].anims.stop()
 
 }
@@ -318,24 +329,27 @@ function update() {
     for(var i = 0; i < enemyRead.length; i++) {
         // deactivate enemies
         if(enemyRead[i].active == false){
-            enemyRead[i].x = -500
-            enemyRead[i].enable = false
-            enemyRead[i].embedded = false
+            gameState.zombiesDead.children.entries[i].x = enemyRead[i].x
+            gameState.zombiesDead.children.entries[i].y = enemyRead[i].y
+            gameState.zombiesDead.children.entries[i].play('zombieDie', true)
+            enemyRead[i].setVelocity(0)
+            enemyRead[i].body.enable = false
             enemyRead[i].visible = false
+            moveTheDead(enemyRead[i], gameState.zombiesDead.children.entries[i])
         }
         // enemy movement
-        if(enemyRead[i].x > gameState.hero.x){
+        if(enemyRead[i].x > gameState.hero.x && enemyRead[i].active == true){
             enemyRead[i].x -= enemyRead[i].speed
             enemyRead[i].play('zombieLeft', true)
         }
-        if(enemyRead[i].x < gameState.hero.x){
+        if(enemyRead[i].x < gameState.hero.x && enemyRead[i].active == true){
             enemyRead[i].x += enemyRead[i].speed
             enemyRead[i].play('zombieRight', true)
         }
-        if(enemyRead[i].y > gameState.hero.y){
+        if(enemyRead[i].y > gameState.hero.y && enemyRead[i].active == true){
             enemyRead[i].y -= enemyRead[i].speed
         }
-        if(enemyRead[i].y < gameState.hero.y){
+        if(enemyRead[i].y < gameState.hero.y && enemyRead[i].active == true){
             enemyRead[i].y += enemyRead[i].speed
         }
 
@@ -352,6 +366,18 @@ function update() {
             enemyRead[i].setDepth(10)
         }
     }
+}
+
+function moveTheDead(enemy, enemyDead) {
+    setTimeout(()=>{
+        enemy.x = -500
+        enemyDead.x = -500
+        enemyDead.anims.stop()
+    }, 1100)
+}
+
+function deactivateEnemy() {
+
 }
 
 const config = {
