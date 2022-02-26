@@ -22,6 +22,11 @@ function preload() {
    
 function create() {
 
+    gameState.headshotText = this.add.text(-500, -500, '130')
+    gameState.headshotText.setDepth(500)
+    gameState.bodyshotText = this.add.text(-500, -500, '60')
+    gameState.bodyshotText.setDepth(500)
+
     const kiss = this.sound.add('kiss')
     const gasp = this.sound.add('gasp')
 
@@ -42,6 +47,7 @@ function create() {
     // gameState.hero.setScale(2.5)
     gameState.hero.setSize(25, 15, true)
     gameState.hero.health = 100
+    gameState.hero.points = 0
 
     gameState.heroArm = this.add.sprite(-500, -500, 'arm')
 
@@ -149,21 +155,29 @@ function create() {
         if(_zombie.active == true){
         if(_zombie.y - _bullet.y > 30){
             // headshot
-            _zombie.health -= 25
+            gameState.hero.points += 130
+            gameState.headshotText.x = _zombie.x
+            gameState.headshotText.y = _zombie.y - (_zombie.y - _bullet.y)
+            _zombie.health -= 100
+            setTimeout(()=>{gameState.headshotText.x = -500}, 150)
         }else{
             // bodyshot
-            _zombie.health -= 10
+            gameState.hero.points += 60
+            gameState.bodyshotText.x = _zombie.x
+            gameState.bodyshotText.y = _zombie.y - (_zombie.y - _bullet.y)
+            _zombie.health -= 18
+            setTimeout(()=>{gameState.bodyshotText.x = -500}, 150)
         }
         console.log('zombie health:' + _zombie.health)
+        console.log('points: ' + gameState.hero.points)
         if(_zombie.health <= 0){
             _zombie.active = false
         }
-
         // /remove bullet from frame
         _bullet.setVelocity(0)
-        _bullet.x = -1000
+        _bullet.x = -200
         gameState.bullets.children.entries[gameState.hero.bulletCount].setVelocity(0)
-        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -1000
+        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -200
         }
     })
 
@@ -375,8 +389,8 @@ function moveTheDead(enemy, enemyDead) {
     }, 1100)
 }
 
-function deactivateEnemy() {
-
+function addText() {
+    this.add.text(200,200,'eh besh')
 }
 
 const config = {
