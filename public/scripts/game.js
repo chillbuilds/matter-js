@@ -291,11 +291,9 @@ function update() {
         gameState.weaponPressed = true
         gameState.weaponCooldown = true
         
- 
-        if(gameState.hero.bulletCount <= 0){
+        if(gameState.hero.bulletCount < 0){
             gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
         }
-        gameState.hero.bulletCount -= 1
 
         let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
         bullethitBox.x = gameState.hero.x
@@ -303,10 +301,11 @@ function update() {
 
         this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
 
-        gameState.weaponCooldown = false
+        console.log(gameState.hero.bulletCount)
+        gameState.hero.bulletCount -= 1
+        console.log(gameState.hero.bulletCount)
 
-        // setTimeout(()=>{gameState.weaponCooldown = false}, 100)
-
+        setTimeout(()=>{gameState.weaponCooldown = false}, 100)
     }
 
     if(gameState.moveUp.isUp && gameState.moveDown.isUp && gameState.moveLeft.isUp && gameState.moveRight.isUp)
