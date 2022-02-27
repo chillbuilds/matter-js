@@ -110,8 +110,8 @@ function create() {
     gameState.weapon.nambu.ammo = gameState.weapon.nambu.ammoCapacity + gameState.weapon.nambu.magCapacity
     gameState.weapon.nambu.ammoType = gameState.ammo.twentyTwo
     gameState.weapon.nambu.fireRate = 20
-    gameState.weapon.nambu.reloadSpeed = 1.7
-    gameState.weapon.nambu.reloadEmptySpeed = 2.5
+    gameState.weapon.nambu.reloadSpeed = 1700
+    gameState.weapon.nambu.reloadEmptySpeed = 2500
 
     gameState.weapon.m1 = this.add.sprite(-500, -500, 'm1')
     gameState.weapon.m1.setScale(0.35)
@@ -123,8 +123,8 @@ function create() {
     gameState.weapon.m1.ammo = gameState.weapon.m1.ammoCapacity + gameState.weapon.m1.magCapacity
     gameState.weapon.m1.ammoType = gameState.ammo.thirtyOughtSix
     gameState.weapon.m1.fireRate = 28
-    gameState.weapon.m1.reloadSpeed = 3.4
-    gameState.weapon.m1.reloadEmptySpeed = 1.65
+    gameState.weapon.m1.reloadSpeed = 3400
+    gameState.weapon.m1.reloadEmptySpeed = 1650
 
     gameState.weapon.raygun = this.add.sprite(-500, -500, 'raygun')
     gameState.weapon.raygun.setScale(0.25)
@@ -135,8 +135,8 @@ function create() {
     gameState.weapon.raygun.mag = gameState.weapon.raygun.magCapacity
     gameState.weapon.raygun.ammo = gameState.weapon.raygun.ammoCapacity + gameState.weapon.raygun.magCapacity
     gameState.weapon.raygun.fireRate = 32
-    gameState.weapon.raygun.reloadSpeed = 1.7
-    gameState.weapon.raygun.reloadEmptySpeed = 2.5
+    gameState.weapon.raygun.reloadSpeed = 1700
+    gameState.weapon.raygun.reloadEmptySpeed = 2500
 
     gameState.weapon.sawedOff = this.add.sprite(-500, -500, 'sawedOff')
     gameState.weapon.sawedOff.setScale(0.35)
@@ -148,8 +148,8 @@ function create() {
     gameState.weapon.sawedOff.ammo = gameState.weapon.sawedOff.ammoCapacity + gameState.weapon.sawedOff.magCapacity
     gameState.weapon.sawedOff.ammoType = gameState.ammo.shotgunShell
     gameState.weapon.sawedOff.fireRate = 40
-    gameState.weapon.sawedOff.reloadSpeed = 2.65
-    gameState.weapon.sawedOff.reloadEmptySpeed = gameState.weapon.sawedOff.reloadSpeed*2
+    gameState.weapon.sawedOff.reloadSpeed = 2650
+    gameState.weapon.sawedOff.reloadEmptySpeed = gameState.weapon.sawedOff.reloadSpeed
 
     gameState.hero.activeWeapon = gameState.weapon.m1
     gameState.hero.inactiveWeapon = gameState.weapon.sawedOff
@@ -310,6 +310,18 @@ function update() {
     // console.log(gameState.hero.activeWeapon.ammoType)
     // for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){}
 
+    // reload mid mag
+    if(gameState.reload.isDown && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
+        gameState.reloadCooldown = true
+        setTimeout(()=>{
+            gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
+            gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
+            gameState.reloadCooldown = false
+            console.log('mag: ' + gameState.hero.activeWeapon.mag)
+            console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+        }, gameState.hero.activeWeapon.reloadSpeed)
+    }
+    // reload empty
     if(gameState.hero.activeWeapon.mag <= 0){
         if(gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false){
             gameState.reloadCooldown = true
@@ -318,8 +330,8 @@ function update() {
                 gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
                 gameState.reloadCooldown = false
                 console.log('mag: ' + gameState.hero.activeWeapon.mag)
-            }, 200)
-        }
+                console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+            }, gameState.hero.activeWeapon.reloadEmptySpeed)}
         console.log('reload')
     }
 
@@ -337,7 +349,7 @@ function update() {
     let leftClick = this.input.activePointer
     if(leftClick.isDown == false){
         gameState.weaponPressed = false}
-    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 ){
+    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
         // decriment weapon magazine
         gameState.hero.activeWeapon.mag -= 1
         console.log('mag:' + gameState.hero.activeWeapon.mag)
@@ -358,9 +370,9 @@ function update() {
         gameState.hero.bulletCount -= 1
 
         gameState.audio.kiss.play()
-        console.log('shot fired')
+        console.log('shots fired')
 
-        setTimeout(()=>{gameState.weaponCooldown = false}, gameState.hero.activeWeapon.fireRate*50)
+        setTimeout(()=>{gameState.weaponCooldown = false}, gameState.hero.activeWeapon.fireRate*10)
     }
 
     if(gameState.moveUp.isUp && gameState.moveDown.isUp && gameState.moveLeft.isUp && gameState.moveRight.isUp)
