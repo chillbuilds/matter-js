@@ -301,9 +301,7 @@ function update() {
 
         this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
 
-        console.log(gameState.hero.bulletCount)
         gameState.hero.bulletCount -= 1
-        console.log(gameState.hero.bulletCount)
 
         setTimeout(()=>{gameState.weaponCooldown = false}, 100)
     }
