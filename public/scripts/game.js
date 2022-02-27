@@ -138,7 +138,7 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        // repeat: 11,
+        repeat: 11,
         speed: 1.5,
     })
     gameState.zombiesDead = this.add.group({
@@ -150,11 +150,13 @@ function create() {
     })
     gameState.bullethitBoxes = this.physics.add.group({
         key: 'bullet',
-        repeat: 2,
-        setScale: {x: 0.1, y: 0.1}
+        repeat: 39,
+        setScale: {x: 0.1, y: 0.1},
+        setXY: {X: -500, y: -500},
+        maxSize: 40
     })
     gameState.bullethitBoxes.setAlpha(0)
-    gameState.hero.bulletCount = 0
+    gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
     gameState.bulletVelocity = 2500
     
     gameState.bullethitBoxes.children.iterateLocal('setImmovable', true)
@@ -208,7 +210,6 @@ function create() {
         frameRate: 8,
         repeat: 0
     })
-    // gameState.zombiesRight.children.iterateLocal('play', 'spawn')
     this.physics.add.collider(gameState.zombies, gameState.hero, function (_hero, _zombie) {
         if(_zombie.active == true){
         _hero.body.enable = false
@@ -228,29 +229,29 @@ function create() {
 
     this.physics.add.collider(gameState.zombies, gameState.bullethitBoxes, function (_zombie, _bullet) {
         if(_zombie.active == true){
-        if(_zombie.y - _bullet.y > 30){
-            // headshot
-            gameState.hero.points += 130
-            gameState.headshotText.x = _zombie.x
-            gameState.headshotText.y = _zombie.y - (_zombie.y - _bullet.y)
-            _zombie.health -= 100
-            setTimeout(()=>{gameState.headshotText.x = -500}, 150)
-        }else{
-            // bodyshot
-            gameState.hero.points += 60
-            gameState.bodyshotText.x = _zombie.x
-            gameState.bodyshotText.y = _zombie.y - (_zombie.y - _bullet.y)
-            _zombie.health -= 18
-            setTimeout(()=>{gameState.bodyshotText.x = -500}, 150)
-        }
-        console.log('zombie health:' + _zombie.health)
-        console.log('points: ' + gameState.hero.points)
-        if(_zombie.health <= 0){
-            _zombie.active = false
-        }
-        // /remove bullet from frame
-        _bullet.setVelocity(0)
-        _bullet.x = -500
+            if(_zombie.y - _bullet.y > 30){
+                // headshot
+                gameState.hero.points += 130
+                gameState.headshotText.x = _zombie.x
+                gameState.headshotText.y = _zombie.y - (_zombie.y - _bullet.y)
+                _zombie.health -= 100
+                setTimeout(()=>{gameState.headshotText.x = -500}, 150)
+            }else{
+                // bodyshot
+                gameState.hero.points += 60
+                gameState.bodyshotText.x = _zombie.x
+                gameState.bodyshotText.y = _zombie.y - (_zombie.y - _bullet.y)
+                _zombie.health -= 18
+                setTimeout(()=>{gameState.bodyshotText.x = -500}, 150)
+            }
+            console.log('zombie health:' + _zombie.health)
+            console.log('points: ' + gameState.hero.points)
+            if(_zombie.health <= 0){
+                _zombie.active = false
+            }
+            // /remove bullet from frame
+            _bullet.setVelocity(0)
+            _bullet.x = -500
         }
     })
 
@@ -284,16 +285,27 @@ function create() {
 
 function update() {
 
+    for(var i = 0; i < gameState.bullethitBoxes.children.entries.length; i++){
+        if(gameState.bullethitBoxes.children.entries[i].x < - 200 ||
+           gameState.bullethitBoxes.children.entries[i].x > + gameDims.width + 200 || 
+           gameState.bullethitBoxes.children.entries[i].y < - 200 ||
+           gameState.bullethitBoxes.children.entries[i].y > + gameDims.height + 200){
+            gameState.bullethitBoxes.children.entries[i].setVelocity(0)
+            gameState.bullethitBoxes.children.entries[i].x = -500
+        }
+    }
+
     let leftClick = this.input.activePointer
     if(leftClick.isDown == false){
         gameState.weaponPressed = false}
     if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false){
-        gameState.weaponPressed = true
-        gameState.weaponCooldown = true
-        
+
         if(gameState.hero.bulletCount < 0){
             gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
         }
+
+        gameState.weaponPressed = true
+        gameState.weaponCooldown = true
 
         let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
         bullethitBox.x = gameState.hero.x
@@ -406,20 +418,20 @@ function update() {
             moveTheDead(enemyRead[i], gameState.zombiesDead.children.entries[i])
         }
         // enemy movement
-        // if(enemyRead[i].x > gameState.hero.x && enemyRead[i].active == true){
-        //     enemyRead[i].x -= enemyRead[i].speed
-        //     enemyRead[i].play('zombieLeft', true)
-        // }
-        // if(enemyRead[i].x < gameState.hero.x && enemyRead[i].active == true){
-        //     enemyRead[i].x += enemyRead[i].speed
-        //     enemyRead[i].play('zombieRight', true)
-        // }
-        // if(enemyRead[i].y > gameState.hero.y && enemyRead[i].active == true){
-        //     enemyRead[i].y -= enemyRead[i].speed
-        // }
-        // if(enemyRead[i].y < gameState.hero.y && enemyRead[i].active == true){
-        //     enemyRead[i].y += enemyRead[i].speed
-        // }
+        if(enemyRead[i].x > gameState.hero.x && enemyRead[i].active == true){
+            enemyRead[i].x -= enemyRead[i].speed
+            enemyRead[i].play('zombieLeft', true)
+        }
+        if(enemyRead[i].x < gameState.hero.x && enemyRead[i].active == true){
+            enemyRead[i].x += enemyRead[i].speed
+            enemyRead[i].play('zombieRight', true)
+        }
+        if(enemyRead[i].y > gameState.hero.y && enemyRead[i].active == true){
+            enemyRead[i].y -= enemyRead[i].speed
+        }
+        if(enemyRead[i].y < gameState.hero.y && enemyRead[i].active == true){
+            enemyRead[i].y += enemyRead[i].speed
+        }
 
         if(gameState.hero.y > enemyRead[i].y){
             gameState.hero.setDepth(10)
@@ -453,8 +465,8 @@ const config = {
         default: 'arcade',
         arcade: {
             // gravity: { y: 300 },
-            debug: true
-            // debug: false
+            // debug: true
+            debug: false
         }
     },
     parent: 'canvasContainer',
