@@ -3,7 +3,7 @@ let gameState = {}
 let gameDims = {width: 1200, height: 600}
 
 function randNum(min, max) { 
-    return Math.random() * (max - min) + min;
+    return Math.random() * (max - min) + min
 } 
 
 function preload() {
@@ -28,14 +28,33 @@ function preload() {
    
 function create() {
     gameState.toggleCooldown = false
+    gameState.reloadCooldown = false
     gameState.weaponCooldown = false
     gameState.weaponPressed = false
 
     // hud
     gameState.ammo = {}
-    gameState.ammo.thirtyOughtSix = this.add.sprite(-500, -500, '30-06').setDepth(900).setScale(0.75)
-    gameState.ammo.twentyTwo = this.add.sprite(-500, -500, '22').setDepth(900).setScale(0.75)
-    gameState.ammo.shotgunShell = this.add.sprite(-500, -500, 'shotgunShell').setDepth(900).setScale(0.75)
+    gameState.ammo.thirtyOughtSix = this.add.group({
+        key: '30-06',
+        repeat: 60,
+        setXY: {x: -500, y: -500}
+    })
+    gameState.ammo.thirtyOughtSix.children.iterateLocal('setScale', 0.7)
+    gameState.ammo.thirtyOughtSix.setDepth(900)
+    gameState.ammo.twentyTwo = this.add.group({
+        key: '22',
+        repeat: 60,
+        setXY: {x: -500, y: -500}
+    })
+    gameState.ammo.twentyTwo.children.iterateLocal('setScale', 0.7)
+    gameState.ammo.twentyTwo.setDepth(900)
+    gameState.ammo.shotgunShell = this.add.group({
+        key: 'shotgunShell',
+        repeat: 60,
+        setXY: {x: -500, y: -500}
+    })
+    gameState.ammo.shotgunShell.children.iterateLocal('setScale', 0.7)
+    gameState.ammo.shotgunShell.setDepth(900)
 
     gameState.headshotText = this.add.text(-500, -500, '130')
     gameState.headshotText.setDepth(500)
@@ -47,8 +66,9 @@ function create() {
     this.add.rectangle(40, 40, 260, 90, 0x0000, 0.75).setDepth(400).setOrigin(0)
 
     // audio setup
-    const kiss = this.sound.add('kiss')
-    const gasp = this.sound.add('gasp')
+    gameState.audio = {}
+    gameState.audio.kiss = this.sound.add('kiss').setVolume(0.05)
+    gameState.audio.gasp = this.sound.add('gasp')
 
     // keyboard setup
     gameState.changeWeapon = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
@@ -72,7 +92,6 @@ function create() {
 
     // hero setup
     gameState.hero = this.physics.add.sprite(600, 450, 'hero')
-    // gameState.hero.setScale(2.5)
     gameState.hero.setSize(25, 15, true)
     gameState.hero.health = 100
     gameState.hero.points = 0
@@ -83,77 +102,75 @@ function create() {
     gameState.weapon = {}
     gameState.weapon.nambu = this.add.sprite(-500, -500, 'nambu')
     gameState.weapon.nambu.setScale(0.3)
-    gameState.weapon.nambu.offset = [-.7, .6, -.7, .25, -4.8, -.35, -5.3, 1.2]
+    gameState.weapon.nambu.offset = [-.7, .6, -.7, .25]
     gameState.weapon.nambu.damage = 30
     gameState.weapon.nambu.magCapacity = 8
     gameState.weapon.nambu.ammoCapacity = 80
     gameState.weapon.nambu.mag = gameState.weapon.nambu.magCapacity
     gameState.weapon.nambu.ammo = gameState.weapon.nambu.ammoCapacity + gameState.weapon.nambu.magCapacity
     gameState.weapon.nambu.ammoType = gameState.ammo.twentyTwo
-    gameState.weapon.nambu.fireRate = 1200
+    gameState.weapon.nambu.fireRate = 20
     gameState.weapon.nambu.reloadSpeed = 1.7
     gameState.weapon.nambu.reloadEmptySpeed = 2.5
 
     gameState.weapon.m1 = this.add.sprite(-500, -500, 'm1')
     gameState.weapon.m1.setScale(0.35)
-    gameState.weapon.m1.offset = [-.15, .52, -.1, .3, -5.3, -.1, -5.3, .85]
+    gameState.weapon.m1.offset = [-.15, .52, -.1, .3]
     gameState.weapon.m1.damage = 50
     gameState.weapon.m1.magCapacity = 8
     gameState.weapon.m1.ammoCapacity = 128
     gameState.weapon.m1.mag = gameState.weapon.m1.magCapacity
     gameState.weapon.m1.ammo = gameState.weapon.m1.ammoCapacity + gameState.weapon.m1.magCapacity
     gameState.weapon.m1.ammoType = gameState.ammo.thirtyOughtSix
-    gameState.weapon.m1.fireRate = 444
+    gameState.weapon.m1.fireRate = 28
     gameState.weapon.m1.reloadSpeed = 3.4
     gameState.weapon.m1.reloadEmptySpeed = 1.65
 
     gameState.weapon.raygun = this.add.sprite(-500, -500, 'raygun')
     gameState.weapon.raygun.setScale(0.25)
-    gameState.weapon.raygun.offset = [-.38, .45, -.38, .45, -4, -.2, -4, 1]
+    gameState.weapon.raygun.offset = [-.38, .45, -.38, .45]
     gameState.weapon.raygun.damage = 90
     gameState.weapon.raygun.magCapacity = 8
     gameState.weapon.raygun.ammoCapacity = 80
     gameState.weapon.raygun.mag = gameState.weapon.raygun.magCapacity
     gameState.weapon.raygun.ammo = gameState.weapon.raygun.ammoCapacity + gameState.weapon.raygun.magCapacity
-    gameState.weapon.raygun.fireRate = 1200
+    gameState.weapon.raygun.fireRate = 32
     gameState.weapon.raygun.reloadSpeed = 1.7
     gameState.weapon.raygun.reloadEmptySpeed = 2.5
 
     gameState.weapon.sawedOff = this.add.sprite(-500, -500, 'sawedOff')
     gameState.weapon.sawedOff.setScale(0.35)
-    gameState.weapon.sawedOff.offset = [0, .65, 0, .2, -4.8, 0, -4.8, .8]
+    gameState.weapon.sawedOff.offset = [0, .65, 0, .2]
     gameState.weapon.sawedOff.damage = 15*8
     gameState.weapon.sawedOff.magCapacity = 2
     gameState.weapon.sawedOff.ammoCapacity = 60
     gameState.weapon.sawedOff.mag = gameState.weapon.sawedOff.magCapacity
     gameState.weapon.sawedOff.ammo = gameState.weapon.sawedOff.ammoCapacity + gameState.weapon.sawedOff.magCapacity
     gameState.weapon.sawedOff.ammoType = gameState.ammo.shotgunShell
-    gameState.weapon.sawedOff.fireRate = 212
+    gameState.weapon.sawedOff.fireRate = 40
     gameState.weapon.sawedOff.reloadSpeed = 2.65
     gameState.weapon.sawedOff.reloadEmptySpeed = gameState.weapon.sawedOff.reloadSpeed*2
 
     gameState.hero.activeWeapon = gameState.weapon.m1
-    gameState.hero.inactiveWeapon = gameState.weapon.nambu
+    gameState.hero.inactiveWeapon = gameState.weapon.sawedOff
 
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 11,
+        // repeat: 11,
         speed: 1.5,
     })
     gameState.zombiesDead = this.add.group({
         key: 'zombie',
         frame: 0,
         repeat: gameState.zombies.children.entries.length-1,
-        setXY: {x: -500, y: -500},
-        hideOnComplete: true
+        setXY: {x: -500, y: -500}
     })
     gameState.bullethitBoxes = this.physics.add.group({
         key: 'bullet',
         repeat: 39,
         setScale: {x: 0.1, y: 0.1},
-        setXY: {X: -500, y: -500},
-        maxSize: 40
+        setXY: {X: -500, y: -500}
     })
     gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
@@ -285,6 +302,28 @@ function create() {
 
 function update() {
 
+    // hud
+    // console.log('mag capacity: ' + gameState.hero.activeWeapon.magCapacity)
+    // console.log('ammo capacity: ' + gameState.hero.activeWeapon.ammoCapacity)
+    // console.log('mag: ' + gameState.hero.activeWeapon.mag)
+    // console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+    // console.log(gameState.hero.activeWeapon.ammoType)
+    // for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){}
+
+    if(gameState.hero.activeWeapon.mag <= 0){
+        if(gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false){
+            gameState.reloadCooldown = true
+            setTimeout(()=>{
+                gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
+                gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
+                gameState.reloadCooldown = false
+                console.log('mag: ' + gameState.hero.activeWeapon.mag)
+            }, 200)
+        }
+        console.log('reload')
+    }
+
+    // recycle bullethitBoxes
     for(var i = 0; i < gameState.bullethitBoxes.children.entries.length; i++){
         if(gameState.bullethitBoxes.children.entries[i].x < - 200 ||
            gameState.bullethitBoxes.children.entries[i].x > + gameDims.width + 200 || 
@@ -298,7 +337,10 @@ function update() {
     let leftClick = this.input.activePointer
     if(leftClick.isDown == false){
         gameState.weaponPressed = false}
-    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false){
+    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 ){
+        // decriment weapon magazine
+        gameState.hero.activeWeapon.mag -= 1
+        console.log('mag:' + gameState.hero.activeWeapon.mag)
 
         if(gameState.hero.bulletCount < 0){
             gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
@@ -315,7 +357,10 @@ function update() {
 
         gameState.hero.bulletCount -= 1
 
-        setTimeout(()=>{gameState.weaponCooldown = false}, 100)
+        gameState.audio.kiss.play()
+        console.log('shot fired')
+
+        setTimeout(()=>{gameState.weaponCooldown = false}, gameState.hero.activeWeapon.fireRate*50)
     }
 
     if(gameState.moveUp.isUp && gameState.moveDown.isUp && gameState.moveLeft.isUp && gameState.moveRight.isUp)
@@ -475,6 +520,6 @@ const config = {
         create,
         update
     }
-  };
+  }
   
   const game = new Phaser.Game(config)
