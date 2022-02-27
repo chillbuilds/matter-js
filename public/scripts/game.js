@@ -41,7 +41,7 @@ function create() {
     gameState.bodyshotText = this.add.text(-500, -500, '60')
     gameState.bodyshotText.setDepth(500)
     this.add.text(50, 50, 'move player: wasd').setDepth(500)
-    this.add.text(50, 75, 'change weapon: caps lock').setDepth(500)
+    this.add.text(50, 75, 'change weapon: shift').setDepth(500)
     this.add.text(50, 100, 'reload: r').setDepth(500)
     this.add.rectangle(40, 40, 260, 90, 0x0000, 0.75).setDepth(400).setOrigin(0)
 
@@ -50,7 +50,7 @@ function create() {
     const gasp = this.sound.add('gasp')
 
     // keyboard setup
-    gameState.changeWeapon = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CAPS_LOCK)
+    gameState.changeWeapon = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
     gameState.reload = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R)
     gameState.moveUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
     gameState.moveLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
