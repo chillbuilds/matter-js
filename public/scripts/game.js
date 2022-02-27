@@ -29,6 +29,7 @@ function preload() {
 function create() {
     gameState.toggleCooldown = false
     gameState.weaponCooldown = false
+    gameState.weaponPressed = false
 
     // hud
     gameState.ammo = {}
@@ -137,7 +138,7 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        repeat: 11,
+        // repeat: 11,
         speed: 1.5,
     })
     gameState.zombiesDead = this.add.group({
@@ -147,22 +148,16 @@ function create() {
         setXY: {x: -500, y: -500},
         hideOnComplete: true
     })
-    gameState.bullets = this.physics.add.group({
-        key: 'bullet',
-        repeat: 9,
-        setScale: {x: 0.05, y: 0.05},
-        setImmovable: true
-    })
     gameState.bullethitBoxes = this.physics.add.group({
         key: 'bullet',
-        repeat: 9,
+        repeat: 2,
         setScale: {x: 0.1, y: 0.1}
     })
     gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = 0
     gameState.bulletVelocity = 2500
     
-
+    gameState.bullethitBoxes.children.iterateLocal('setImmovable', true)
     gameState.zombies.children.iterateLocal('setSize', 25, 150)
 
     this.anims.create({
@@ -255,9 +250,7 @@ function create() {
         }
         // /remove bullet from frame
         _bullet.setVelocity(0)
-        _bullet.x = -200
-        gameState.bullets.children.entries[gameState.hero.bulletCount].setVelocity(0)
-        gameState.bullets.children.entries[gameState.hero.bulletCount].x = -200
+        _bullet.x = -500
         }
     })
 
@@ -287,65 +280,34 @@ function create() {
         enemySetup[i].body.setImmovable(true)
     }
 
-    // mouse click
-    this.input.on('pointerdown', function (pointer) {
-    if(gameState.weaponCooldown == false){
-        // gameState.weaponCooldown = true
-        setTimeout(()=>{gameState.weaponCooldown == false}, 100)
-        
- 
-        if(gameState.hero.bulletCount < 1){
-            gameState.hero.bulletCount = gameState.bullets.children.entries.length
-        }
-        gameState.hero.bulletCount -= 1
-
-        // if(gameState.hero.facing == 'left'){
-        //     gameState.muzzFlash.flipX = false
-        //     gameState.muzzFlash.x = gameState.hero.x-50
-        //     gameState.muzzFlash.y = gameState.hero.y-18
-
-        //     // bullet.x = gameState.hero.x 
-        //     // bullet.y = gameState.hero.y - 18
-        // }
-        // if(gameState.hero.facing == 'right'){
-        //     gameState.muzzFlash.flipX = true
-        //     gameState.muzzFlash.x = gameState.hero.x+50
-        //     gameState.muzzFlash.y = gameState.hero.y-18
-
-            
-        // }
-
-        // setTimeout(()=>{gameState.muzzFlash.x = -500}, 20)
-        
-        let bullet = gameState.bullets.children.entries[gameState.hero.bulletCount]
-        let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
-        // bullet offset
-        if(gameState.hero.facing == 'left'){
-            bullet.setOrigin(gameState.hero.activeWeapon.offset[4], gameState.hero.activeWeapon.offset[5])
-            }
-        if(gameState.hero.facing == 'right'){
-            bullet.setOrigin(gameState.hero.activeWeapon.offset[6], gameState.hero.activeWeapon.offset[7])
-        }
-        bullet.x = gameState.hero.activeWeapon.x
-        bullet.y = gameState.hero.activeWeapon.y
-        bullethitBox.x = gameState.hero.x
-        bullethitBox.y = gameState.hero.y
-
-        let bulletPhys = this.physics.moveTo(bullet, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
-        this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
-
-        bullet.rotation = bulletPhys
-    }
-    }, this)
-
-    // gameState.zombies.children.entries[0].play('zombieLeft')
-    // gameState.zombies.children.entries[0].anims.stop()
-
 }
 
 function update() {
 
-    
+    let leftClick = this.input.activePointer
+    if(leftClick.isDown == false){
+        gameState.weaponPressed = false}
+    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false){
+        gameState.weaponPressed = true
+        gameState.weaponCooldown = true
+        
+ 
+        if(gameState.hero.bulletCount <= 0){
+            gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
+        }
+        gameState.hero.bulletCount -= 1
+
+        let bullethitBox = gameState.bullethitBoxes.children.entries[gameState.hero.bulletCount]
+        bullethitBox.x = gameState.hero.x
+        bullethitBox.y = gameState.hero.y
+
+        this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
+
+        gameState.weaponCooldown = false
+
+        // setTimeout(()=>{gameState.weaponCooldown = false}, 100)
+
+    }
 
     if(gameState.moveUp.isUp && gameState.moveDown.isUp && gameState.moveLeft.isUp && gameState.moveRight.isUp)
     {gameState.hero.anims.stop()}
@@ -447,20 +409,20 @@ function update() {
             moveTheDead(enemyRead[i], gameState.zombiesDead.children.entries[i])
         }
         // enemy movement
-        if(enemyRead[i].x > gameState.hero.x && enemyRead[i].active == true){
-            enemyRead[i].x -= enemyRead[i].speed
-            enemyRead[i].play('zombieLeft', true)
-        }
-        if(enemyRead[i].x < gameState.hero.x && enemyRead[i].active == true){
-            enemyRead[i].x += enemyRead[i].speed
-            enemyRead[i].play('zombieRight', true)
-        }
-        if(enemyRead[i].y > gameState.hero.y && enemyRead[i].active == true){
-            enemyRead[i].y -= enemyRead[i].speed
-        }
-        if(enemyRead[i].y < gameState.hero.y && enemyRead[i].active == true){
-            enemyRead[i].y += enemyRead[i].speed
-        }
+        // if(enemyRead[i].x > gameState.hero.x && enemyRead[i].active == true){
+        //     enemyRead[i].x -= enemyRead[i].speed
+        //     enemyRead[i].play('zombieLeft', true)
+        // }
+        // if(enemyRead[i].x < gameState.hero.x && enemyRead[i].active == true){
+        //     enemyRead[i].x += enemyRead[i].speed
+        //     enemyRead[i].play('zombieRight', true)
+        // }
+        // if(enemyRead[i].y > gameState.hero.y && enemyRead[i].active == true){
+        //     enemyRead[i].y -= enemyRead[i].speed
+        // }
+        // if(enemyRead[i].y < gameState.hero.y && enemyRead[i].active == true){
+        //     enemyRead[i].y += enemyRead[i].speed
+        // }
 
         if(gameState.hero.y > enemyRead[i].y){
             gameState.hero.setDepth(10)
@@ -494,7 +456,8 @@ const config = {
         default: 'arcade',
         arcade: {
             // gravity: { y: 300 },
-            debug: false
+            debug: true
+            // debug: false
         }
     },
     parent: 'canvasContainer',
