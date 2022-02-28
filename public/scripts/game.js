@@ -314,11 +314,13 @@ function update() {
     if(gameState.reload.isDown && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
         gameState.reloadCooldown = true
         setTimeout(()=>{
+            if(gameState.reloadCooldown == true){
             gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
             gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
             gameState.reloadCooldown = false
             console.log('mag: ' + gameState.hero.activeWeapon.mag)
             console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+            }
         }, gameState.hero.activeWeapon.reloadSpeed)
     }
     // reload empty
@@ -326,11 +328,13 @@ function update() {
         if(gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false){
             gameState.reloadCooldown = true
             setTimeout(()=>{
+                if(gameState.reloadCooldown == true){
                 gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
                 gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
                 gameState.reloadCooldown = false
                 console.log('mag: ' + gameState.hero.activeWeapon.mag)
                 console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+                }
             }, gameState.hero.activeWeapon.reloadEmptySpeed)}
         console.log('reload')
     }
@@ -427,6 +431,7 @@ function update() {
 
     //weapon toggle
     if(gameState.changeWeapon.isDown && gameState.toggleCooldown == false){
+        gameState.reloadCooldown = false
         gameState.toggleCooldown = true
         gameState.hero.weaponSwap = gameState.hero.inactiveWeapon
         gameState.hero.inactiveWeapon = gameState.hero.activeWeapon
