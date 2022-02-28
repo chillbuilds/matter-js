@@ -1,6 +1,6 @@
 
 let gameState = {}
-let gameDims = {width: 1200, height: 600}
+var gameDims = {width: 1200, height: 600}
 
 function randNum(min, max) { 
     return Math.random() * (max - min) + min
@@ -325,7 +325,7 @@ function update() {
     }
     // reload empty
     if(gameState.hero.activeWeapon.mag <= 0){
-        if(gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false){
+        if((gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false)){
             gameState.reloadCooldown = true
             setTimeout(()=>{
                 if(gameState.reloadCooldown == true){
@@ -350,10 +350,10 @@ function update() {
         }
     }
 
-    let leftClick = this.input.activePointer
-    if(leftClick.isDown == false){
+    gameState.leftClick = this.input.activePointer
+    if(gameState.leftClick.isDown == false){
         gameState.weaponPressed = false}
-    if(leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
+    if(gameState.leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
         // decriment weapon magazine
         gameState.hero.activeWeapon.mag -= 1
         console.log('mag:' + gameState.hero.activeWeapon.mag)
