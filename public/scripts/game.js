@@ -17,6 +17,7 @@ function preload() {
     this.load.image('m1', '../images/sprites/weapons/m1.png')
     this.load.image('raygun', '../images/sprites/weapons/raygun.png')
     this.load.image('sawedOff', '../images/sprites/weapons/sawedOff.png')
+    this.load.image('grenade', '../images/sprites/weapons/grenade.png')
     this.load.image('30-06', '../images/sprites/weapons/bullets/30-06.png')
     this.load.image('22', '../images/sprites/weapons/bullets/22.png')
     this.load.image('shotgunShell', '../images/sprites/weapons/bullets/shotgunShell.png')
@@ -172,11 +173,22 @@ function create() {
         setScale: {x: 0.1, y: 0.1},
         setXY: {X: -500, y: -500}
     })
+    gameState.grenades = this.physics.add.group({
+        key: 'grenade',
+        setXY: {x: 500, y: 450},
+        bounceX: .3,
+        bounceY: .3,
+        collideWorldBounds: true
+    })
+    console.log(gameState.grenades.children.entries[0])
+    gameState.grenades.children.entries[0].setFrictionX(1)
+    gameState.grenades.children.iterateLocal('setScale', 0.1)
+    gameState.grenades.children.entries[0].setVelocityX(-200)
+    gameState.grenades.children.entries[0].setVelocityY(-400)
     gameState.bullethitBoxes.setAlpha(0)
     gameState.hero.bulletCount = gameState.bullethitBoxes.children.entries.length-1
     gameState.bulletVelocity = 2500
-    
-    gameState.bullethitBoxes.children.iterateLocal('setImmovable', true)
+
     gameState.zombies.children.iterateLocal('setSize', 25, 150)
 
     this.anims.create({
@@ -296,6 +308,13 @@ function create() {
         enemySetup[i].active = true
         enemySetup[i].health = 50
         enemySetup[i].body.setImmovable(true)
+        enemySetup[i].body.allowGravity = false
+    }
+    gameState.hero.body.allowGravity = false
+    let bulletHitBoxArr = gameState.bullethitBoxes.getChildren()
+    for(var i = 0; i < bulletHitBoxArr.length; i++){
+        bulletHitBoxArr[i].body.setImmovable(true)
+        bulletHitBoxArr[i].body.allowGravity = false
     }
 
 }
@@ -522,11 +541,11 @@ const config = {
     type: Phaser.AUTO,
     width: gameDims.width,
     height: gameDims.height,
-    backgroundColor: "#2E86AB",
+    backgroundColor: "#5899E2",
     physics: {
         default: 'arcade',
         arcade: {
-            // gravity: { y: 300 },
+            gravity: { y: 1500 },
             // debug: true
             debug: false
         }
