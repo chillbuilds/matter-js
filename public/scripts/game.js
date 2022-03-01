@@ -36,6 +36,9 @@ function preload() {
 }
    
 function create() {
+
+    gameState.fence = this.add.sprite(253, 280, 'fence')
+
     gameState.toggleCooldown = false
     gameState.reloadCooldown = false
     gameState.weaponCooldown = false
