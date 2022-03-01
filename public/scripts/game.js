@@ -24,12 +24,12 @@ function preload() {
     this.load.image('hitBox', '../images/sprites/hitbox.png')
 
     // level 1
-    this.load.image('scroll-bg-1-of-3', '../images/sprites/levels/level-1/bg-1-of-3.png')
-    this.load.image('scroll-bg-2-of-3', '../images/sprites/levels/level-1/bg-2-of-3.png')
-    this.load.image('scroll-bg-3-of-3', '../images/sprites/levels/level-1/bg-3-of-3.png')
-    this.load.image('dumpster', '../images/sprites/levels/level-1/dumpster.png')
-    this.load.image('railing', '../images/sprites/levels/level-1/railing.png')
-    this.load.image('fence', '../images/sprites/levels/level-1/fence.png')
+    this.load.image('scroll-bg-1-of-3', '../images/sprites/levels/level-1/scroll/bg-1-of-3.png')
+    this.load.image('scroll-bg-2-of-3', '../images/sprites/levels/level-1/scroll/bg-2-of-3.png')
+    this.load.image('scroll-bg-3-of-3', '../images/sprites/levels/level-1/scroll/bg-3-of-3.png')
+    this.load.image('dumpster', '../images/sprites/levels/level-1/scroll/dumpster.png')
+    this.load.image('railing', '../images/sprites/levels/level-1/scroll/railing.png')
+    this.load.image('fence', '../images/sprites/levels/level-1/scroll/fence.png')
 
     this.load.audio('kiss', '../audio/kiss.wav')
     this.load.audio('gasp', '../audio/gasp.wav')
