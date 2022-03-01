@@ -11,7 +11,7 @@ function preload() {
     this.load.spritesheet('hero', '../images/sprites/julie.png', { frameWidth: 192, frameHeight: 240})
     this.load.image('arm', '../images/sprites/arm.png')
     this.load.image('bullet', '../images/sprites/weapons/bullet.png')
-    this.load.image('bg', '../images/sprites/background.png')
+    this.load.image('bg', '../images/sprites/levels/level-1/scroll/bg-3-of-3.png')
     this.load.image('muzzFlash', '../images/sprites/muzzFlash.png')
     this.load.image('nambu', '../images/sprites/weapons/nambu.png')
     this.load.image('m1', '../images/sprites/weapons/m1.png')
@@ -410,7 +410,7 @@ function update() {
     {gameState.hero.anims.stop()}
 
     // bounds boundaries
-    if(gameState.hero.y <= 400){
+    if(gameState.hero.y <= 370){
         gameState.hero.y += 5}
     if(gameState.hero.y >= 525){
         gameState.hero.y -= 5}
