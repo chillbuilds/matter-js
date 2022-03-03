@@ -171,7 +171,7 @@ function create() {
         key: 'zombie',
         frame: 0,
         // repeat: 200,
-        // repeat: 11,
+        repeat: 11,
         speed: 1.5,
     })
     gameState.zombiesDead = this.add.group({
@@ -315,7 +315,7 @@ function create() {
 
     let enemySetup = gameState.zombies.getChildren()
     for(var i = 0; i < enemySetup.length; i++) {
-        enemySetup[i].x = randNum(-50, -200)
+        enemySetup[i].x = randNum(-50, -500)
         enemySetup[i].y = randNum(gameDims.height/2, gameDims.height)
         enemySetup[i].speed = randNum(.5, 1.5)
         enemySetup[i].active = true
