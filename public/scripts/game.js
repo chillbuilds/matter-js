@@ -43,6 +43,7 @@ function create() {
     gameState.reloadCooldown = false
     gameState.weaponCooldown = false
     gameState.weaponPressed = false
+    gameState.weaponChangePressed = false
 
     // hud
     gameState.ammo = {}
@@ -169,7 +170,7 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
-        // repeat: 49,
+        // repeat: 200,
         // repeat: 11,
         speed: 1.5,
     })
@@ -329,6 +330,8 @@ function create() {
         bulletHitBoxArr[i].body.allowGravity = false
     }
 
+    hudBulletUpdate()
+
 }
 
 function update() {
@@ -339,37 +342,22 @@ function update() {
     // console.log('mag: ' + gameState.hero.activeWeapon.mag)
     // console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
     // console.log(gameState.hero.activeWeapon.ammoType)
-    for(var i = 0; i < gameState.hero.activeWeapon.magCapacity; i++){
-        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
-        ammoGroupInstance.x = -500
-        ammoGroupInstance.y = -500
-    }
-    let stepX = 0
-    for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){
-        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
-        ammoGroupInstance.x = gameDims.width - 75 - stepX
-        ammoGroupInstance.y = 50
-        stepX += ammoGroupInstance.width
-    }
-    for(var i = 0; i < gameState.hero.inactiveWeapon.magCapacity; i++){
-        let ammoGroupInstance = gameState.hero.inactiveWeapon.ammoType.children.entries[i]
-        ammoGroupInstance.x = -500
-        ammoGroupInstance.y = -500
-    }
 
     // reload mid mag
     if(gameState.reload.isDown && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
         gameState.reloadCooldown = true
         setTimeout(()=>{
             if(gameState.reloadCooldown == true){
-            gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
-            gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity
-            gameState.reloadCooldown = false
-            console.log('mag: ' + gameState.hero.activeWeapon.mag)
-            console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+                gameState.hero.activeWeapon.ammo -= gameState.hero.activeWeapon.magCapacity - gameState.hero.activeWeapon.mag
+                gameState.hero.activeWeapon.mag = gameState.hero.activeWeapon.magCapacity
+                gameState.reloadCooldown = false
+                console.log('mag: ' + gameState.hero.activeWeapon.mag)
+                console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+                hudBulletUpdate()
             }
         }, gameState.hero.activeWeapon.reloadSpeed)
     }
+    
     // reload empty
     if(gameState.hero.activeWeapon.mag <= 0){
         if((gameState.reload.isDown && gameState.hero.activeWeapon.ammo > gameState.hero.activeWeapon.magCapacity && gameState.reloadCooldown == false)){
@@ -381,6 +369,7 @@ function update() {
                 gameState.reloadCooldown = false
                 console.log('mag: ' + gameState.hero.activeWeapon.mag)
                 console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
+                hudBulletUpdate()
                 }
             }, gameState.hero.activeWeapon.reloadEmptySpeed)}
         console.log('reload')
@@ -398,6 +387,7 @@ function update() {
     }
 
     gameState.leftClick = this.input.activePointer
+    
     if(gameState.leftClick.isDown == false){
         gameState.weaponPressed = false}
     if(gameState.leftClick.isDown && gameState.weaponCooldown == false && gameState.weaponPressed == false && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
@@ -419,6 +409,8 @@ function update() {
         this.physics.moveTo(bullethitBox, game.input.mousePointer.x, game.input.mousePointer.y, gameState.bulletVelocity)
 
         gameState.hero.bulletCount -= 1
+
+        hudBulletUpdate()
 
         gameState.audio.kiss.play()
         console.log('shots fired')
@@ -477,14 +469,23 @@ function update() {
     }
 
     //weapon toggle
-    if(gameState.changeWeapon.isDown && gameState.toggleCooldown == false){
+    if(gameState.changeWeapon.isDown == false){
+        gameState.weaponChangePressed = false}
+    if(gameState.changeWeapon.isDown && gameState.toggleCooldown == false && gameState.weaponChangePressed == false){
+        gameState.weaponChangePressed = true
         gameState.reloadCooldown = false
         gameState.toggleCooldown = true
         gameState.hero.weaponSwap = gameState.hero.inactiveWeapon
         gameState.hero.inactiveWeapon = gameState.hero.activeWeapon
         gameState.hero.activeWeapon = gameState.hero.weaponSwap
         gameState.hero.inactiveWeapon.x = -500
-        setTimeout(()=>{gameState.toggleCooldown = false}, 500)
+        for(var i = 0; i < gameState.hero.inactiveWeapon.magCapacity; i++){
+            let ammoGroupInstance = gameState.hero.inactiveWeapon.ammoType.children.entries[i]
+            ammoGroupInstance.x = -500
+            ammoGroupInstance.y = -500
+        }
+        hudBulletUpdate()
+        setTimeout(()=>{gameState.toggleCooldown = false}, 200)
     }
     // hero movement and animation
     gameState.hero.setVelocity(0)
@@ -563,6 +564,21 @@ function moveTheDead(enemy, enemyDead) {
         enemyDead.x = -500
         enemyDead.anims.stop()
     }, 1100)
+}
+
+function hudBulletUpdate() {
+    for(var i = 0; i < gameState.hero.activeWeapon.magCapacity; i++){
+        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
+        ammoGroupInstance.x = -500
+        ammoGroupInstance.y = -500
+    }
+    let stepX = 0
+    for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){
+        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
+        ammoGroupInstance.x = gameDims.width - 75 - stepX
+        ammoGroupInstance.y = 50
+        stepX += ammoGroupInstance.width
+    }
 }
 
 const config = {
