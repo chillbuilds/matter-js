@@ -169,6 +169,7 @@ function create() {
     gameState.zombies = this.physics.add.group({
         key: 'zombie',
         frame: 0,
+        // repeat: 49,
         // repeat: 11,
         speed: 1.5,
     })
@@ -338,7 +339,23 @@ function update() {
     // console.log('mag: ' + gameState.hero.activeWeapon.mag)
     // console.log('ammo: ' + gameState.hero.activeWeapon.ammo)
     // console.log(gameState.hero.activeWeapon.ammoType)
-    // for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){}
+    for(var i = 0; i < gameState.hero.activeWeapon.magCapacity; i++){
+        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
+        ammoGroupInstance.x = -500
+        ammoGroupInstance.y = -500
+    }
+    let stepX = 0
+    for(var i = 0; i < gameState.hero.activeWeapon.mag; i++){
+        let ammoGroupInstance = gameState.hero.activeWeapon.ammoType.children.entries[i]
+        ammoGroupInstance.x = gameDims.width - 75 - stepX
+        ammoGroupInstance.y = 50
+        stepX += ammoGroupInstance.width
+    }
+    for(var i = 0; i < gameState.hero.inactiveWeapon.magCapacity; i++){
+        let ammoGroupInstance = gameState.hero.inactiveWeapon.ammoType.children.entries[i]
+        ammoGroupInstance.x = -500
+        ammoGroupInstance.y = -500
+    }
 
     // reload mid mag
     if(gameState.reload.isDown && gameState.hero.activeWeapon.mag > 0 && gameState.reloadCooldown == false){
